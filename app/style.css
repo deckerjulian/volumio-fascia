@@ -13,10 +13,17 @@
   --text-3: rgba(244, 245, 247, .44);
   --line: rgba(255, 255, 255, .07);
   --danger: #ff6b6b;
+  /* Sichere Bereiche (Notch, Home-Indicator) auf Handys, z. B. in der Volumio-App für iOS; sonst 0 */
+  --sa-t: env(safe-area-inset-top, 0px);
+  --sa-r: env(safe-area-inset-right, 0px);
+  --sa-b: env(safe-area-inset-bottom, 0px);
+  --sa-l: env(safe-area-inset-left, 0px);
+  --vw: calc(100vw - var(--sa-l) - var(--sa-r));
+  --vh: calc(100vh - var(--sa-t) - var(--sa-b));
 }
 
 /* Grundgröße: Hochformat 320 px breit => 1rem = 16px; skaliert mit der Displaybreite */
-html { font-size: min(calc(100vw / 20), calc(100vh / 56)); }
+html { font-size: min(calc(var(--vw) / 20), calc(var(--vh) / 56)); }
 
 * { box-sizing: border-box; }
 
@@ -91,10 +98,9 @@ body.bg-solid #bg {
   position: relative;
   height: 100%;
   width: 100%;
-  max-width: 20rem;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  padding: var(--sa-t) var(--sa-r) 0 var(--sa-l);
 }
 
 #player {
@@ -386,6 +392,7 @@ body.expanded #mini { display: grid; }
   border-top: 1px solid rgba(255, 255, 255, .06);
   border-radius: 1.25rem 1.25rem 0 0;
   overflow: hidden;
+  padding-bottom: var(--sa-b);
 }
 
 #tabs {
@@ -435,6 +442,14 @@ body.panel-collapsed #tabs { border-bottom: 0; }
 body.panel-collapsed #player { flex: 1; justify-content: center; }
 body.panel-collapsed .tab.active { color: var(--text-3); }
 body.panel-collapsed .tab.active::after { display: none; }
+/* Auf Handys ist das Display breiter als die Bar: eingeklappt wächst das Cover in den freien Platz */
+@media (max-aspect-ratio: 1/1) {
+  body.panel-collapsed #art-wrap {
+    width: max(18rem, min(100%, calc(var(--vh) - 28rem)));
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+}
 
 .view { display: none; flex: 1; min-height: 0; min-width: 0; flex-direction: column; }
 .view.active { display: flex; }
@@ -670,10 +685,8 @@ body:not(.is-playing) .eq i { animation-play-state: paused; }
   position: fixed;
   z-index: 40;
   left: 0; right: 0; bottom: 0;
-  max-width: 20rem;
-  margin: 0 auto;
   display: none;
-  padding: .5rem .5rem .75rem;
+  padding: .5rem calc(.5rem + var(--sa-r)) calc(.75rem + var(--sa-b)) calc(.5rem + var(--sa-l));
   background: #0e0f14;
   border-top: 1px solid var(--line);
   touch-action: none;
@@ -708,6 +721,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 #system {
   z-index: 65;
   flex-direction: column;
+  padding: var(--sa-t) var(--sa-r) var(--sa-b) var(--sa-l);
   background: var(--bg);
 }
 #system-bar {
@@ -758,7 +772,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   z-index: 68;
   align-items: flex-start;
   justify-content: center;
-  padding: .75rem;
+  padding: max(.75rem, var(--sa-t)) max(.75rem, var(--sa-r)) max(.75rem, var(--sa-b)) max(.75rem, var(--sa-l));
   background: rgba(0, 0, 0, .6);
   animation: fadein .18s ease;
 }
@@ -800,7 +814,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   z-index: 55;
   align-items: center;
   justify-content: center;
-  padding: .75rem;
+  padding: max(.75rem, var(--sa-t)) max(.75rem, var(--sa-r)) max(.75rem, var(--sa-b)) max(.75rem, var(--sa-l));
   background: rgba(0, 0, 0, .6);
   animation: fadein .18s ease;
 }
@@ -876,7 +890,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 #toast {
   position: fixed;
   z-index: 60;
-  top: 3rem;
+  top: calc(3rem + var(--sa-t));
   left: 50%;
   max-width: calc(100vw - 2rem);
   padding: .625rem 1rem;
@@ -921,7 +935,8 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 /* ------------------------------------------------------------ Breite Bildschirme (Bar-Display quer, Computer) */
 
 @media (min-aspect-ratio: 1/1) {
-  #app { flex-direction: row; max-width: none; }
+  #app { flex-direction: row; padding-bottom: var(--sa-b); }
+  #panel { padding-bottom: 0; }
 
   #mini, body.expanded #mini { display: none; }
 
@@ -978,10 +993,8 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 
   /* Tastatur liegt über dem Player, die (gefilterte) Liste rechts bleibt sichtbar */
   #keyboard {
-    top: 0; bottom: 0; left: 0;
-    right: 32.75rem;
-    max-width: none;
-    margin: 0;
+    top: var(--sa-t); bottom: var(--sa-b); left: var(--sa-l);
+    right: calc(32.75rem + var(--sa-r));
     padding: .75rem;
     flex-direction: column;
     border-top: 0;
@@ -1023,13 +1036,13 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   #zones { justify-content: flex-end; }
   .zones-card { max-width: 30rem; }
   .sheet-card { max-width: 26rem; }
-  #toast { top: 1rem; }
+  #toast { top: calc(1rem + var(--sa-t)); }
 }
 
 /* ------------------------------------------------------------ Bar-Display quer (1480×320) */
 
 @media (min-aspect-ratio: 2/1) {
-  html { font-size: min(calc(100vh / 20), calc(100vw / 80)); }
+  html { font-size: min(calc(var(--vh) / 20), calc(var(--vw) / 80)); }
 
   .bg-layer { top: -60%; left: -5%; width: 110%; height: 220%; }
   #bg::after {
@@ -1074,7 +1087,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 /* ------------------------------------------------------------ Computer / Tablet quer */
 
 @media (min-aspect-ratio: 1/1) and (max-aspect-ratio: 2/1) {
-  html { font-size: min(calc(100vh / 54), calc(100vw / 88)); }
+  html { font-size: min(calc(var(--vh) / 54), calc(var(--vw) / 88)); }
 
   .bg-layer { top: -15%; left: -10%; width: 120%; height: 130%; }
   #bg::after {
@@ -1095,7 +1108,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   /* Player als zentrierte Spalte; das Cover so groß, wie die Höhe es erlaubt */
   #player,
   body.expanded #player {
-    --col: min(32rem, calc(100vh - 25rem));
+    --col: min(32rem, calc(var(--vh) - 25rem));
     flex: 1;
     min-width: 0;
     display: flex;

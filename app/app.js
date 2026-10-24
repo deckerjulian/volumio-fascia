@@ -1025,9 +1025,10 @@
     var card = els.sheet.firstElementChild;
     card.style.marginTop = '0px';
     els.sheet.classList.add('open');
-    var padY = parseFloat(getComputedStyle(els.sheet).paddingTop) || 0;
+    var cs = getComputedStyle(els.sheet);
+    var padY = parseFloat(cs.paddingTop) || 0;
     var h = card.offsetHeight;
-    var maxTop = window.innerHeight - h - padY;
+    var maxTop = window.innerHeight - h - (parseFloat(cs.paddingBottom) || 0);
     var top = anchor == null ? (window.innerHeight - h) / 2 : anchor - h / 2;
     top = Math.max(padY, Math.min(maxTop, top));
     card.style.marginTop = (top - padY) + 'px';
