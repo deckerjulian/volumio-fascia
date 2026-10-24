@@ -41,6 +41,8 @@
   "ANALYZER_DELAY_DOC": "Delays the bars if they run ahead of the sound. 0 is usually right because the analyzer taps the audio right before the DAC.",
   "TAB_LABELS": "Menu icon labels",
   "TAB_LABELS_DOC": "Shows the name below the queue, library and search icons.",
+  "PANEL_OPEN": "Side panel expanded",
+  "PANEL_OPEN_DOC": "Shows queue, library and search expanded at start. Off: only the icon bar, the player gets the space.",
   "ANALYZER_FAILED": "The band analyzer could not be activated (see log). Playback is not affected.",
   "PORT80": "Show theme at volumio.local",
   "PORT80_DOC": "Redirects http://volumio.local (port 80) to the theme. Volumio's own UI stays available at http://volumio.local:3000.",

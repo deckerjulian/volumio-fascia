@@ -100,6 +100,7 @@ To update later, copy the new files and run `volumio plugin update` on the devic
 | Scrolling text | on | long titles scroll instead of being cut off |
 | 24-hour clock | on | |
 | Menu icon labels | off | show names below the panel icons |
+| Side panel expanded | off | start with queue, library and search expanded instead of only the icon bar |
 | Band analyzer | on | takes effect the next time playback starts |
 | Analyzer delay library & web radio | 0 ms | only needed if the bars run ahead of the sound |
 | Analyzer delay AirPlay, Spotify & co. | 0 ms | separate value for sources outside MPD |

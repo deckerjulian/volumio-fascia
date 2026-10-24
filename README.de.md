@@ -104,6 +104,7 @@ Für Updates die neuen Dateien kopieren und auf dem Gerät `volumio plugin updat
 | Laufschrift | an | lange Titel laufen durch statt abgeschnitten zu werden |
 | 24-Stunden-Uhr | an | |
 | Beschriftung der Menüsymbole | aus | Namen unter den Panel-Symbolen |
+| Menüleiste ausgeklappt | aus | Warteschlange, Bibliothek und Suche beim Start ausgeklappt statt nur der Symbolleiste |
 | Band-Analyzer | an | wirkt ab dem nächsten Start der Wiedergabe |
 | Analyzer-Verzögerung Bibliothek & Webradio | 0 ms | nur nötig, falls die Balken dem Ton vorauslaufen |
 | Analyzer-Verzögerung AirPlay, Spotify & Co. | 0 ms | eigener Wert für Quellen außerhalb von MPD |

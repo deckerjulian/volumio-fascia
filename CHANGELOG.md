@@ -4,6 +4,8 @@
 
 - Phones (e.g. the Volumio iOS app): portrait layout uses the full screen width, the cover grows
   with the free space, and the layout respects the notch and home indicator
+- New setting “Side panel expanded” chooses whether the panel starts expanded or collapsed
+  (default: collapsed as before)
 
 ## 1.1.0
 

@@ -157,6 +157,7 @@ TouchBarTheme.prototype.getThemeSettings = function () {
     idleTimeout: c.get('idleTimeout'),
     clock24h: c.get('clock24h'),
     tabLabels: c.get('tabLabels'),
+    panelOpen: c.get('panelOpen'),
     analyzer: c.get('analyzer'),
     analyzerDelayMpd: c.get('analyzerDelayMpd'),
     analyzerDelayOther: c.get('analyzerDelayOther')
@@ -249,6 +250,7 @@ TouchBarTheme.prototype.getUIConfig = function () {
     findField(look, 'marquee').value = self.config.get('marquee');
     findField(look, 'clock24h').value = self.config.get('clock24h');
     findField(look, 'tabLabels').value = self.config.get('tabLabels');
+    findField(look, 'panelOpen').value = self.config.get('panelOpen');
     findField(look, 'analyzer').value = self.config.get('analyzer');
     findField(look, 'analyzerDelayMpd').value = self.config.get('analyzerDelayMpd');
     findField(look, 'analyzerDelayOther').value = self.config.get('analyzerDelayOther');
@@ -314,6 +316,7 @@ TouchBarTheme.prototype.saveAppearance = function (data) {
   this.config.set('marquee', !!data.marquee);
   this.config.set('clock24h', !!data.clock24h);
   this.config.set('tabLabels', !!data.tabLabels);
+  this.config.set('panelOpen', !!data.panelOpen);
   ['analyzerDelayMpd', 'analyzerDelayOther'].forEach(function (key) {
     var delay = parseInt(data[key], 10);
     this.config.set(key, delay >= 0 ? Math.min(delay, 3000) : 0);

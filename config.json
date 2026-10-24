@@ -11,6 +11,7 @@
   "idleTimeout": { "type": "number", "value": 300 },
   "clock24h": { "type": "boolean", "value": true },
   "tabLabels": { "type": "boolean", "value": false },
+  "panelOpen": { "type": "boolean", "value": false },
   "analyzer": { "type": "boolean", "value": true },
   "analyzerDelayMpd": { "type": "number", "value": 0 },
   "analyzerDelayOther": { "type": "number", "value": 0 }

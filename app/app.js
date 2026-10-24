@@ -121,6 +121,7 @@
     idleTimeout: 300,
     clock24h: true,
     tabLabels: false,
+    panelOpen: false,
     analyzer: true,
     analyzerDelayMpd: 0,
     analyzerDelayOther: 0
@@ -306,6 +307,7 @@
   // ================================================================ Einstellungen
 
   var settingsJson = '';
+  var settingsLoaded = false;
 
   function loadSettings() {
     if (location.protocol === 'file:') return Promise.resolve(applySettings({}));
@@ -319,7 +321,11 @@
     var json = JSON.stringify(s || {});
     if (json === settingsJson) return;
     settingsJson = json;
+    var prevPanelOpen = settings.panelOpen;
     settings = Object.assign({}, DEFAULTS, s);
+    // Start-Zustand der Menüleiste; danach nur, wenn die Einstellung geändert wurde
+    if (!settingsLoaded || !!settings.panelOpen !== !!prevPanelOpen) setPanelLevel(settings.panelOpen ? 1 : 0);
+    settingsLoaded = true;
     ['accentMode', 'accentColor', 'background'].forEach(function (k) {
       if (params.has(k)) settings[k] = params.get(k);
     });
@@ -1108,7 +1114,6 @@
     els.panelUp.hidden = panelLevel >= maxPanelLevel();
     els.panelDown.hidden = panelLevel === 0;
     if (panelLevel === 0) closeKeyboard();
-    storeSet('tb.panelLevel', String(panelLevel));
     // Player ändert seine Breite bzw. Höhe
     requestAnimationFrame(function () {
       sizeSpectrum();
@@ -1983,9 +1988,8 @@
   searchIdle();
   syncSearch();
   syncFilter();
-  // Standard: eingeklappt. (Neuer Schlüssel, damit der alte gespeicherte Zustand nicht greift.)
-  var savedLevel = storeGet('tb.panelLevel');
-  setPanelLevel(savedLevel === null ? 0 : Number(savedLevel));
+  // Bis die Einstellungen da sind eingeklappt; applySettings setzt dann den gewählten Start-Zustand
+  setPanelLevel(0);
   var savedTab = storeGet('tb.tab');
   switchTab(savedTab === 'browse' || savedTab === 'search' ? savedTab : 'queue');
   setOnline(false);
