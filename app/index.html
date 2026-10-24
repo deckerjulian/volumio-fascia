@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de" translate="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0a0b0f">
+  <link rel="icon" href="data:,">
+  <title>Touch Bar Theme</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="bg" aria-hidden="true"></div>
+
+  <div id="app">
+    <section id="player">
+      <header id="status">
+        <span id="clock">--:--</span>
+        <span id="status-right">
+          <span id="quality" class="chip"></span>
+          <span id="conn" class="conn off" aria-hidden="true"></span>
+          <button id="btn-system" class="tbtn" data-icon="settings" data-i18n-label="system"></button>
+        </span>
+      </header>
+
+      <div id="art-wrap">
+        <div id="art-fallback" data-icon="music"></div>
+        <img id="art" alt="" draggable="false">
+      </div>
+
+      <div id="meta">
+        <div class="marquee title"><span id="title"></span></div>
+        <div class="marquee artist"><span id="artist"></span></div>
+        <div id="album" class="ellipsis"></div>
+      </div>
+
+      <div id="seek-wrap">
+        <div id="seek" class="slider" role="slider" aria-label="Position">
+          <canvas id="spectrum" aria-hidden="true"></canvas>
+          <div class="track"><div class="bar"><div class="fill"></div></div><div class="thumb-pos"><div class="thumb"></div></div></div>
+        </div>
+        <div id="times"><span id="elapsed">0:00</span><span id="live" data-i18n="live">LIVE</span><span id="duration">0:00</span></div>
+      </div>
+
+      <div id="transport">
+        <button id="btn-random" class="tbtn side" data-icon="shuffle" data-i18n-label="shuffle"></button>
+        <button id="btn-prev" class="tbtn skip" data-icon="prev" data-i18n-label="previous"></button>
+        <button id="btn-play" class="tbtn play" data-icon="play" data-i18n-label="playPause"></button>
+        <button id="btn-next" class="tbtn skip" data-icon="next" data-i18n-label="next"></button>
+        <button id="btn-repeat" class="tbtn side" data-icon="repeat" data-i18n-label="repeat"></button>
+      </div>
+
+      <div id="volume-row">
+        <button id="btn-mute" class="tbtn side" data-icon="volUp" data-i18n-label="zones"></button>
+        <div id="volume" class="slider" role="slider" aria-label="Volume">
+          <div class="track"><div class="bar"><div class="fill"></div></div><div class="thumb-pos"><div class="thumb"></div></div></div>
+        </div>
+        <span id="volume-value">0</span>
+      </div>
+    </section>
+
+    <section id="mini">
+      <div id="mini-art"><img alt="" draggable="false"></div>
+      <div id="mini-text">
+        <div id="mini-title" class="ellipsis"></div>
+        <div id="mini-artist" class="ellipsis"></div>
+      </div>
+      <button id="mini-play" class="tbtn" data-icon="play" data-i18n-label="playPause"></button>
+      <button id="mini-next" class="tbtn" data-icon="next" data-i18n-label="next"></button>
+      <div id="mini-progress"><div class="fill"></div></div>
+    </section>
+
+    <section id="panel">
+      <nav id="tabs">
+        <button class="tab" data-tab="queue" data-i18n-label="queue"><span data-icon="queue"></span><b data-i18n="queue"></b></button>
+        <button class="tab" data-tab="browse" data-i18n-label="library"><span data-icon="library"></span><b data-i18n="library"></b></button>
+        <button class="tab" data-tab="search" data-i18n-label="search"><span data-icon="search"></span><b data-i18n="search"></b></button>
+        <span class="tabs-gap"></span>
+        <button id="btn-down" class="tbtn panel-btn" data-icon="expandMore" data-i18n-label="collapse"></button>
+        <button id="btn-up" class="tbtn panel-btn" data-icon="expandLess" data-i18n-label="expand"></button>
+      </nav>
+
+      <div class="view" id="view-queue">
+        <div class="view-head">
+          <div class="head-text"><b id="queue-count"></b><small id="queue-time"></small></div>
+          <button id="btn-clear" class="pill" data-icon="clearAll"><span data-i18n="clear"></span></button>
+        </div>
+        <div class="list" id="queue-list"></div>
+      </div>
+
+      <div class="view" id="view-browse">
+        <div class="view-head">
+          <button id="btn-back" class="tbtn" data-icon="back" data-i18n-label="back"></button>
+          <div class="head-text"><b id="browse-title"></b></div>
+          <label id="filter-box" class="field">
+            <span data-icon="search"></span>
+            <input id="filter-input" type="text" _vkEnabled="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+            <button id="filter-clear" class="tbtn" data-icon="close" data-i18n-label="clear"></button>
+          </label>
+          <button id="btn-playall" class="tbtn round-accent" data-icon="play" data-i18n-label="playAll"></button>
+        </div>
+        <div class="list" id="browse-list"></div>
+      </div>
+
+      <div class="view" id="view-search">
+        <div class="view-head search-head">
+          <label id="search-box" class="field">
+            <span data-icon="search"></span>
+            <input id="search-input" type="text" _vkEnabled="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+            <button id="search-clear" class="tbtn" data-icon="close" data-i18n-label="clear"></button>
+          </label>
+        </div>
+        <div class="list" id="search-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="keyboard" aria-hidden="true"></div>
+
+  <div id="system" class="overlay">
+    <div id="system-bar">
+      <button id="system-back" class="tbtn sysbtn"><span data-icon="back"></span><b data-i18n="settings"></b></button>
+      <b id="system-title"></b>
+      <button id="system-close" class="tbtn sysbtn"><span data-icon="close"></span><b data-i18n="player"></b></button>
+    </div>
+    <div id="system-menu" class="list"><div class="tiles" id="system-tiles"></div></div>
+    <div id="system-page"><iframe id="system-frame" title="Volumio"></iframe></div>
+  </div>
+
+  <div id="zones" class="overlay">
+    <div class="zones-card">
+      <div class="zones-head">
+        <b data-i18n="zones"></b>
+        <button id="zones-close" class="tbtn" data-icon="close" data-i18n-label="close"></button>
+      </div>
+      <div id="zones-list" class="list"></div>
+    </div>
+  </div>
+
+  <div id="sheet" class="overlay">
+    <div class="sheet-card">
+      <div class="sheet-head">
+        <div id="sheet-title" class="ellipsis"></div>
+        <div id="sheet-sub" class="ellipsis"></div>
+      </div>
+      <div id="sheet-actions"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="idle" class="overlay">
+    <div id="idle-inner">
+      <div id="idle-clock">--:--</div>
+      <div id="idle-date"></div>
+      <div id="idle-track" class="ellipsis"></div>
+    </div>
+  </div>
+
+  <div id="offline" class="overlay">
+    <div class="spinner"></div>
+    <div data-i18n="connecting"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

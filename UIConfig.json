@@ -1,0 +1,256 @@
+{
+  "page": {
+    "label": "TRANSLATE.PAGE_TITLE"
+  },
+  "sections": [
+    {
+      "id": "section_display",
+      "element": "section",
+      "label": "TRANSLATE.SECTION_DISPLAY",
+      "description": "TRANSLATE.SECTION_DISPLAY_DESC",
+      "icon": "fa-mobile",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "user_interface/touch_bar_theme",
+        "method": "saveDisplay"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.SAVE",
+        "data": [
+          "kiosk",
+          "port80",
+          "port"
+        ]
+      },
+      "content": [
+        {
+          "id": "kiosk",
+          "element": "switch",
+          "label": "TRANSLATE.KIOSK",
+          "doc": "TRANSLATE.KIOSK_DOC",
+          "value": true
+        },
+        {
+          "id": "port80",
+          "element": "switch",
+          "label": "TRANSLATE.PORT80",
+          "doc": "TRANSLATE.PORT80_DOC",
+          "value": true
+        },
+        {
+          "id": "port",
+          "element": "input",
+          "type": "number",
+          "label": "TRANSLATE.PORT",
+          "doc": "TRANSLATE.PORT_DOC",
+          "attributes": [
+            {
+              "min": 1024
+            },
+            {
+              "max": 65535
+            }
+          ],
+          "value": 4005
+        },
+        {
+          "id": "restartKiosk",
+          "element": "button",
+          "label": "TRANSLATE.RESTART_KIOSK",
+          "doc": "TRANSLATE.RESTART_KIOSK_DOC",
+          "onClick": {
+            "type": "plugin",
+            "endpoint": "user_interface/touch_bar_theme",
+            "method": "restartKiosk",
+            "data": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "section_appearance",
+      "element": "section",
+      "label": "TRANSLATE.SECTION_APPEARANCE",
+      "icon": "fa-paint-brush",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "user_interface/touch_bar_theme",
+        "method": "saveAppearance"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.SAVE",
+        "data": [
+          "accentMode",
+          "accentColor",
+          "background",
+          "marquee",
+          "clock24h",
+          "tabLabels",
+          "analyzer",
+          "analyzerDelayMpd",
+          "analyzerDelayOther"
+        ]
+      },
+      "content": [
+        {
+          "id": "accentMode",
+          "element": "select",
+          "label": "TRANSLATE.ACCENT_MODE",
+          "doc": "TRANSLATE.ACCENT_MODE_DOC",
+          "value": {
+            "value": "cover",
+            "label": "TRANSLATE.ACCENT_COVER"
+          },
+          "options": [
+            {
+              "value": "cover",
+              "label": "TRANSLATE.ACCENT_COVER"
+            },
+            {
+              "value": "fixed",
+              "label": "TRANSLATE.ACCENT_FIXED"
+            }
+          ]
+        },
+        {
+          "id": "accentColor",
+          "element": "input",
+          "type": "text",
+          "label": "TRANSLATE.ACCENT_COLOR",
+          "doc": "TRANSLATE.ACCENT_COLOR_DOC",
+          "value": "#3ddc97"
+        },
+        {
+          "id": "background",
+          "element": "select",
+          "label": "TRANSLATE.BACKGROUND",
+          "doc": "TRANSLATE.BACKGROUND_DOC",
+          "value": {
+            "value": "blur",
+            "label": "TRANSLATE.BACKGROUND_BLUR"
+          },
+          "options": [
+            {
+              "value": "blur",
+              "label": "TRANSLATE.BACKGROUND_BLUR"
+            },
+            {
+              "value": "solid",
+              "label": "TRANSLATE.BACKGROUND_SOLID"
+            }
+          ]
+        },
+        {
+          "id": "marquee",
+          "element": "switch",
+          "label": "TRANSLATE.MARQUEE",
+          "doc": "TRANSLATE.MARQUEE_DOC",
+          "value": true
+        },
+        {
+          "id": "clock24h",
+          "element": "switch",
+          "label": "TRANSLATE.CLOCK24H",
+          "value": true
+        },
+        {
+          "id": "tabLabels",
+          "element": "switch",
+          "label": "TRANSLATE.TAB_LABELS",
+          "doc": "TRANSLATE.TAB_LABELS_DOC",
+          "value": false
+        },
+        {
+          "id": "analyzer",
+          "element": "switch",
+          "label": "TRANSLATE.ANALYZER",
+          "doc": "TRANSLATE.ANALYZER_DOC",
+          "value": true
+        },
+        {
+          "id": "analyzerDelayMpd",
+          "element": "input",
+          "type": "number",
+          "label": "TRANSLATE.ANALYZER_DELAY_MPD",
+          "doc": "TRANSLATE.ANALYZER_DELAY_DOC",
+          "attributes": [
+            {
+              "min": 0
+            },
+            {
+              "max": 3000
+            }
+          ],
+          "value": 0
+        },
+        {
+          "id": "analyzerDelayOther",
+          "element": "input",
+          "type": "number",
+          "label": "TRANSLATE.ANALYZER_DELAY_OTHER",
+          "doc": "TRANSLATE.ANALYZER_DELAY_DOC",
+          "attributes": [
+            {
+              "min": 0
+            },
+            {
+              "max": 3000
+            }
+          ],
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "section_behaviour",
+      "element": "section",
+      "label": "TRANSLATE.SECTION_BEHAVIOUR",
+      "icon": "fa-hand-pointer-o",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "user_interface/touch_bar_theme",
+        "method": "saveBehaviour"
+      },
+      "saveButton": {
+        "label": "TRANSLATE.SAVE",
+        "data": [
+          "keyboard",
+          "hideCursor",
+          "idleTimeout"
+        ]
+      },
+      "content": [
+        {
+          "id": "keyboard",
+          "element": "switch",
+          "label": "TRANSLATE.KEYBOARD",
+          "doc": "TRANSLATE.KEYBOARD_DOC",
+          "value": true
+        },
+        {
+          "id": "hideCursor",
+          "element": "switch",
+          "label": "TRANSLATE.HIDE_CURSOR",
+          "doc": "TRANSLATE.HIDE_CURSOR_DOC",
+          "value": true
+        },
+        {
+          "id": "idleTimeout",
+          "element": "input",
+          "type": "number",
+          "label": "TRANSLATE.IDLE_TIMEOUT",
+          "doc": "TRANSLATE.IDLE_TIMEOUT_DOC",
+          "attributes": [
+            {
+              "min": 0
+            },
+            {
+              "max": 86400
+            }
+          ],
+          "value": 300
+        }
+      ]
+    }
+  ]
+}

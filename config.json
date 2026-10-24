@@ -1,0 +1,17 @@
+{
+  "port": { "type": "number", "value": 4005 },
+  "kiosk": { "type": "boolean", "value": true },
+  "port80": { "type": "boolean", "value": true },
+  "accentMode": { "type": "string", "value": "cover" },
+  "accentColor": { "type": "string", "value": "#3ddc97" },
+  "background": { "type": "string", "value": "blur" },
+  "marquee": { "type": "boolean", "value": true },
+  "keyboard": { "type": "boolean", "value": true },
+  "hideCursor": { "type": "boolean", "value": true },
+  "idleTimeout": { "type": "number", "value": 300 },
+  "clock24h": { "type": "boolean", "value": true },
+  "tabLabels": { "type": "boolean", "value": false },
+  "analyzer": { "type": "boolean", "value": true },
+  "analyzerDelayMpd": { "type": "number", "value": 0 },
+  "analyzerDelayOther": { "type": "number", "value": 0 }
+}

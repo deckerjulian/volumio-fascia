@@ -1,0 +1,53 @@
+{
+  "name": "touch_bar_theme",
+  "version": "1.1.0",
+  "description": "Touch-first Volumio UI for 320×1480 bar displays with a band analyzer for every source",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/smoke.js",
+    "dev": "node test/dev-server.js",
+    "build-alsa": "alsa/build.sh"
+  },
+  "author": "Julian Decker",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deckerjulian/volumio-touch-bar-theme.git"
+  },
+  "volumio_info": {
+    "prettyName": "Touch Bar Theme",
+    "icon": "fa-mobile",
+    "plugin_type": "user_interface",
+    "architectures": [
+      "amd64",
+      "armhf",
+      "arm64",
+      "i386"
+    ],
+    "os": [
+      "buster",
+      "bullseye",
+      "bookworm"
+    ],
+    "details": "Eigene Oberfläche für Touch-Displays mit 320×1480 Pixeln. Läuft als eigener Webserver und wird auf Wunsch automatisch als Kiosk-Seite des Touch-Display-Plugins eingetragen.",
+    "changelog": "1.1.0: Band-Analyzer für alle Quellen (ALSA), einklappbares Menü, Volumio-Einstellungen; 1.0.0: Erste Version",
+    "has_alsa_contribution": true
+  },
+  "engines": {
+    "node": ">=14",
+    "volumio": ">=3"
+  },
+  "dependencies": {
+    "kew": "^0.7.0",
+    "v-conf": "^1.4.2"
+  },
+  "homepage": "https://github.com/deckerjulian/volumio-touch-bar-theme",
+  "keywords": [
+    "volumio",
+    "volumio-plugin",
+    "touch",
+    "kiosk",
+    "bar-display",
+    "spectrum-analyzer"
+  ]
+}
