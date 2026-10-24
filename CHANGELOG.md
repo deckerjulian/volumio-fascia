@@ -6,6 +6,11 @@
   with the free space, and the layout respects the notch and home indicator
 - New setting “Side panel expanded” chooses whether the panel starts expanded or collapsed
   (default: collapsed as before)
+- The side panel is see-through; new settings choose its style (Transparent or “Liquid Glass”)
+  and opacity. Player animations pause while the settings menu is open
+- Panel and settings menu are tinted with the dynamic accent colour
+- Bar display: the side panel has the same edge spacing as the cover; play/pause sits centred
+  under the position slider (shuffle/repeat to its left, volume to its right)
 - Fix: Volumio pages (settings inside the theme, Volumio UI on port 3000) hung on the loading
   spinner while the theme was served on port 80; the theme server now answers `/api/host` so
   Volumio's UI connects to port 3000

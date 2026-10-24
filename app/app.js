@@ -122,6 +122,8 @@
     clock24h: true,
     tabLabels: false,
     panelOpen: false,
+    panelStyle: 'transparent',
+    panelOpacity: 40,
     analyzer: true,
     analyzerDelayMpd: 0,
     analyzerDelayOther: 0
@@ -317,6 +319,13 @@
       .catch(function () { applySettings({}); });
   }
 
+  // Prozentwert aus den Einstellungen als Deckkraft 0–1
+  function percent(v, fallback) {
+    var n = Number(v);
+    if (!isFinite(n) || v === '' || v === null) n = fallback;
+    return String(Math.max(0, Math.min(100, n)) / 100);
+  }
+
   function applySettings(s) {
     var json = JSON.stringify(s || {});
     if (json === settingsJson) return;
@@ -326,7 +335,7 @@
     // Start-Zustand der Menüleiste; danach nur, wenn die Einstellung geändert wurde
     if (!settingsLoaded || !!settings.panelOpen !== !!prevPanelOpen) setPanelLevel(settings.panelOpen ? 1 : 0);
     settingsLoaded = true;
-    ['accentMode', 'accentColor', 'background'].forEach(function (k) {
+    ['accentMode', 'accentColor', 'background', 'panelStyle'].forEach(function (k) {
       if (params.has(k)) settings[k] = params.get(k);
     });
 
@@ -335,6 +344,8 @@
 
     els.body.classList.toggle('bg-solid', settings.background === 'solid');
     els.body.classList.toggle('tab-labels', !!settings.tabLabels);
+    els.body.classList.toggle('glass', settings.panelStyle === 'glass');
+    document.documentElement.style.setProperty('--panel-alpha', percent(settings.panelOpacity, DEFAULTS.panelOpacity));
     els.body.classList.toggle('no-cursor', !!(settings.hideCursor && KIOSK));
     [els.searchInput, els.filterInput].forEach(function (input) {
       input.setAttribute('inputmode', builtinKeyboard() ? 'none' : 'search');
@@ -370,6 +381,9 @@
     return m ? [Math.round(+m[0]), Math.round(+m[1]), Math.round(+m[2])] : null;
   }
 
+  var SURFACE_BASE = [14, 15, 20];
+  var SURFACE_MIX = 0.35;
+
   function setAccent(color) {
     var rgb = parseColor(color) || parseColor(DEFAULTS.accentColor);
     var root = document.documentElement.style;
@@ -378,6 +392,9 @@
     accentRgb = rgb.join(',');
     var lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
     root.setProperty('--accent-ink', lum > 0.55 ? '#0b0d10' : '#ffffff');
+    // Panel und Einstellungen in der Akzentfarbe, abgedunkelt, damit weiße Schrift lesbar bleibt
+    var surface = rgb.map(function (c, i) { return Math.round(c * SURFACE_MIX + SURFACE_BASE[i] * (1 - SURFACE_MIX)); });
+    root.setProperty('--surface-rgb', surface.join(', '));
   }
 
   function updateAccent() {
@@ -634,7 +651,8 @@
   // wenige Pixel pro Sekunde, 30 Bilder/s sehen daher genauso flüssig aus wie 60 und schonen den Pi.
   var lastFrame = 0;
   function frame(now) {
-    if (now - lastFrame >= 32 && !document.hidden) {
+    // Die Einstellungsseite verdeckt den Player; solange muss er nichts zeichnen
+    if (now - lastFrame >= 32 && !document.hidden && !els.body.classList.contains('system-open')) {
       lastFrame = now;
       if (isPlaying()) updateProgress();
       if (spectrum.source) drawSpectrum(now);
@@ -1761,10 +1779,12 @@
     emit('getMenuItems');
     showSystemMenu();
     els.system.classList.add('open');
+    els.body.classList.add('system-open');
   }
 
   function closeSystem() {
     els.system.classList.remove('open');
+    els.body.classList.remove('system-open');
     showSystemMenu();
     emit('getState');
     emit('getQueue');

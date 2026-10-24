@@ -87,6 +87,8 @@
           "clock24h",
           "tabLabels",
           "panelOpen",
+          "panelStyle",
+          "panelOpacity",
           "analyzer",
           "analyzerDelayMpd",
           "analyzerDelayOther"
@@ -167,6 +169,42 @@
           "label": "TRANSLATE.PANEL_OPEN",
           "doc": "TRANSLATE.PANEL_OPEN_DOC",
           "value": false
+        },
+        {
+          "id": "panelStyle",
+          "element": "select",
+          "label": "TRANSLATE.PANEL_STYLE",
+          "doc": "TRANSLATE.PANEL_STYLE_DOC",
+          "value": {
+            "value": "transparent",
+            "label": "TRANSLATE.PANEL_STYLE_TRANSPARENT"
+          },
+          "options": [
+            {
+              "value": "transparent",
+              "label": "TRANSLATE.PANEL_STYLE_TRANSPARENT"
+            },
+            {
+              "value": "glass",
+              "label": "TRANSLATE.PANEL_STYLE_GLASS"
+            }
+          ]
+        },
+        {
+          "id": "panelOpacity",
+          "element": "input",
+          "type": "number",
+          "label": "TRANSLATE.PANEL_OPACITY",
+          "doc": "TRANSLATE.PANEL_OPACITY_DOC",
+          "attributes": [
+            {
+              "min": 0
+            },
+            {
+              "max": 100
+            }
+          ],
+          "value": 40
         },
         {
           "id": "analyzer",

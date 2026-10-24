@@ -101,6 +101,8 @@ To update later, copy the new files and run `volumio plugin update` on the devic
 | 24-hour clock | on | |
 | Menu icon labels | off | show names below the panel icons |
 | Side panel expanded | off | start with queue, library and search expanded instead of only the icon bar |
+| Panel style | Transparent | or “Liquid Glass” with sheen and a light edge |
+| Panel opacity | 40 % | 0 = fully transparent, 100 = opaque |
 | Band analyzer | on | takes effect the next time playback starts |
 | Analyzer delay library & web radio | 0 ms | only needed if the bars run ahead of the sound |
 | Analyzer delay AirPlay, Spotify & co. | 0 ms | separate value for sources outside MPD |

@@ -20,6 +20,15 @@
   --sa-l: env(safe-area-inset-left, 0px);
   --vw: calc(100vw - var(--sa-l) - var(--sa-r));
   --vh: calc(100vh - var(--sa-t) - var(--sa-b));
+  /* Flächenfarbe von Panel und Einstellungen: Akzentfarbe, abgedunkelt (setAccent in app.js) */
+  --surface-rgb: 14, 15, 20;
+  /* Deckkraft des Panels (0–1), aus den Theme-Einstellungen */
+  --panel-alpha: .4;
+  /* Stil „Liquid Glass“: Glanz von oben links, helle Lichtkante, weicher Schatten */
+  --glass-sheen: linear-gradient(155deg, rgba(255, 255, 255, .14) 0%, rgba(255, 255, 255, .04) 32%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, .06) 100%);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, .3), inset 1px 0 0 rgba(255, 255, 255, .12), inset 0 -1px 0 rgba(255, 255, 255, .06), inset -1px 0 0 rgba(255, 255, 255, .05);
+  --glass-shadow: 0 .75rem 2.5rem -.5rem rgba(0, 0, 0, .55);
+  --glass-border: rgba(255, 255, 255, .1);
 }
 
 /* Grundgröße: Hochformat 320 px breit => 1rem = 16px; skaliert mit der Displaybreite */
@@ -388,8 +397,9 @@ body.expanded #mini { display: grid; }
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: rgba(14, 15, 20, .72);
-  border-top: 1px solid rgba(255, 255, 255, .06);
+  /* Transparent: das unscharfe Cover scheint durch */
+  background: rgba(var(--surface-rgb), var(--panel-alpha));
+  border-top: 1px solid rgba(255, 255, 255, .08);
   border-radius: 1.25rem 1.25rem 0 0;
   overflow: hidden;
   padding-bottom: var(--sa-b);
@@ -577,6 +587,7 @@ body.panel-collapsed .tab.active::after { display: none; }
 .eq i:nth-child(2) { animation-delay: -.35s; }
 .eq i:nth-child(3) { animation-delay: -.65s; }
 body:not(.is-playing) .eq i { animation-play-state: paused; }
+body.system-open .marquee > span.run, body.system-open .eq i { animation-play-state: paused; }
 @keyframes eq { from { transform: scaleY(.25); } to { transform: scaleY(1.2); } }
 
 .list-title {
@@ -722,7 +733,8 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   z-index: 65;
   flex-direction: column;
   padding: var(--sa-t) var(--sa-r) var(--sa-b) var(--sa-l);
-  background: var(--bg);
+  /* Deckend in der (abgedunkelten) Akzentfarbe, unabhängig vom Panel-Stil */
+  background: rgb(var(--surface-rgb));
 }
 #system-bar {
   flex: none;
@@ -946,9 +958,9 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
     width: 32rem;
     margin: .375rem .375rem .375rem 0;
     flex-direction: row;
-    border: 1px solid rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .08);
     border-radius: 1rem;
-    background: rgba(18, 19, 25, .8);
+    background: rgba(var(--surface-rgb), var(--panel-alpha));
   }
   #tabs {
     flex: none;
@@ -1064,7 +1076,7 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
       "art status    status"
       "art meta      meta"
       "art seek      seek"
-      "art transport volume";
+      "art transport transport";
     column-gap: 1.5rem;
     align-items: center;
     padding: 1rem 1.5rem 1rem 1rem;
@@ -1075,8 +1087,27 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
   #seek-wrap,
   body.analyzer #seek-wrap { grid-area: seek; margin-top: 0; align-self: end; }
   #spectrum { height: 4.375rem; }
-  #transport { grid-area: transport; margin-top: 0; }
-  #volume-row { grid-area: volume; margin-top: 0; }
+  /* Bedienleiste über die ganze Breite unter dem Slider: Play/Pause genau in der Mitte,
+     Zufall und Wiederholen links davon, die Lautstärke rechts in derselben Rasterzelle */
+  #transport {
+    grid-area: transport;
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    column-gap: .75rem;
+  }
+  #btn-random { grid-column: 1; grid-row: 1; justify-self: end; margin-right: 3.25rem; }
+  #btn-repeat { grid-column: 1; grid-row: 1; justify-self: end; }
+  #volume-row {
+    grid-area: transport;
+    justify-self: end;
+    width: calc((100% - 12.25rem - 3rem) / 2);
+    margin-top: 0;
+  }
+
+  /* Panel mit demselben Randabstand wie das Cover links (gleich hoch, gleich weit vom Rand) */
+  #panel { margin: 1rem 1rem 1rem 0; }
+  #keyboard { right: calc(33rem + var(--sa-r)); }
 
   /* Volumio-Seiten verkleinert: bei 320 px Höhe bliebe neben Volumios eigenem Mini-Player sonst kaum Platz */
   #system-frame { width: 125%; height: 125%; transform: scale(.8); transform-origin: 0 0; }
@@ -1130,4 +1161,36 @@ body.kb-open #panel { padding-bottom: var(--kb-h, 0); }
 
   #idle-clock { font-size: 8rem; }
   #idle-track { max-width: 40rem; }
+}
+
+/* ------------------------------------------------------------ Stil „Liquid Glass“ */
+
+/* Unter dem Panel liegt nur das ohnehin unscharfe Cover, daher kein backdrop-filter: ohne
+   GPU-Compositing (Kiosk) würde Chromium es bei jedem Analyzer-Bild neu weichzeichnen
+   (gemessen auf dem Pi 5: 36 % -> 92 % CPU). Die Einstellungsseite bleibt deckend, ohne Glas. */
+body.glass #panel {
+  background: var(--glass-sheen), rgba(var(--surface-rgb), var(--panel-alpha));
+  border: 1px solid var(--glass-border);
+  border-bottom: 0;
+  box-shadow: var(--glass-rim), var(--glass-shadow);
+}
+/* Aktiver Tab: Glas-Pille hinter dem Symbol statt Akzentbalken */
+body.glass .tab { isolation: isolate; }
+body.glass .tab.active::after { display: none; }
+body.glass .tab.active::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: .375rem; bottom: .375rem; left: 14%; right: 14%;
+  border-radius: 99rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -1px 0 rgba(255, 255, 255, .06), 0 .25rem .75rem rgba(0, 0, 0, .25);
+}
+body.glass.panel-collapsed .tab.active::before { display: none; }
+body.glass #panel .tile { background: var(--glass-sheen), rgba(255, 255, 255, .05); box-shadow: var(--glass-rim); }
+body.glass #panel .tile.pressed { background: rgba(255, 255, 255, .14); }
+
+@media (min-aspect-ratio: 1/1) {
+  body.glass #panel { border-bottom: 1px solid var(--glass-border); }
+  body.glass .tab.active::before { top: .375rem; bottom: .375rem; left: .4375rem; right: .4375rem; border-radius: .875rem; }
 }
