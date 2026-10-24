@@ -13,7 +13,7 @@ function get(port, p) {
     http.get({ host: '127.0.0.1', port: port, path: p }, function (res) {
       var body = '';
       res.on('data', function (c) { body += c; });
-      res.on('end', function () { resolve({ status: res.statusCode, type: res.headers['content-type'], body: body }); });
+      res.on('end', function () { resolve({ status: res.statusCode, type: res.headers['content-type'], headers: res.headers, body: body }); });
     }).on('error', reject);
   });
 }
@@ -67,6 +67,31 @@ server.start(0).then(function (port) {
   });
 }).then(function () {
   return server.stop();
+}).then(function () {
+  // /api/host: Volumios Adresse bekommt Volumios Port, damit dessen Oberfläche nicht über Port 80
+  // (Theme) zu verbinden versucht
+  var fake = http.createServer(function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ host: 'http://192.168.1.5' }));
+  });
+  return new Promise(function (resolve) { fake.listen(0, resolve); }).then(function () {
+    var fakePort = fake.address().port;
+    var proxied = createServer({
+      root: path.join(__dirname, '..', 'app'),
+      volumioHost: '127.0.0.1',
+      volumioPort: fakePort,
+      getSettings: function () { return {}; }
+    });
+    return proxied.start(0).then(function (port) {
+      return get(port, '/api/host');
+    }).then(function (r) {
+      assert.strictEqual(r.status, 200);
+      assert.strictEqual(JSON.parse(r.body).host, 'http://192.168.1.5:' + fakePort);
+      assert.strictEqual(r.headers['access-control-allow-origin'], '*');
+      fake.close();
+      return proxied.stop();
+    });
+  });
 }).then(function () {
   console.log('Smoke-Test OK');
 }).catch(function (err) {

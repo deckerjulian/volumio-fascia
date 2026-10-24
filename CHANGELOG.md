@@ -6,6 +6,9 @@
   with the free space, and the layout respects the notch and home indicator
 - New setting “Side panel expanded” chooses whether the panel starts expanded or collapsed
   (default: collapsed as before)
+- Fix: Volumio pages (settings inside the theme, Volumio UI on port 3000) hung on the loading
+  spinner while the theme was served on port 80; the theme server now answers `/api/host` so
+  Volumio's UI connects to port 3000
 
 ## 1.1.0
 
