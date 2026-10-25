@@ -7,6 +7,19 @@ var http = require('http');
 var path = require('path');
 var createServer = require('../lib/server');
 var kiosk = require('../lib/kiosk');
+var songinfo = require('../lib/songinfo');
+
+function post(port, p, body, type) {
+  return new Promise(function (resolve, reject) {
+    var req = http.request({ host: '127.0.0.1', port: port, path: p, method: 'POST', headers: { 'Content-Type': type || 'application/json' } }, function (res) {
+      var data = '';
+      res.on('data', function (c) { data += c; });
+      res.on('end', function () { resolve({ status: res.statusCode, body: data }); });
+    });
+    req.on('error', reject);
+    req.end(body);
+  });
+}
 
 function get(port, p) {
   return new Promise(function (resolve, reject) {
@@ -41,11 +54,24 @@ assert.strictEqual(kiosk.restore(original), original, 'fremde Skripte bleiben un
 var nowPlaying = original.replace('http://localhost:3000', 'http://localhost:4004');
 assert.strictEqual(kiosk.restore(nowPlaying), nowPlaying, 'andere Kiosk-Plugins bleiben unberührt');
 
+// --- Titel für die Suche nach Songtext und Infos
+assert.strictEqual(songinfo.clean('Let It Be - Remastered 2009'), 'Let It Be');
+assert.strictEqual(songinfo.clean('Get Lucky (Radio Edit)'), 'Get Lucky');
+assert.strictEqual(songinfo.norm('Beyoncé & Jay-Z'), 'beyonce and jay z');
+assert.strictEqual(songinfo.norm('Группа крови'), 'группа крови', 'nicht-lateinische Titel bleiben erhalten');
+
 // --- Webserver
+var themeSettings = { accentMode: 'cover', lyricsInline: false };
+var asked = null;
 var server = createServer({
   root: path.join(__dirname, '..', 'app'),
   proxy: false,
-  getSettings: function () { return { accentMode: 'cover' }; }
+  getSettings: function () { return themeSettings; },
+  onSettings: function (patch) { themeSettings.lyricsInline = !!patch.lyricsInline; },
+  songInfo: {
+    lyrics: function (q) { asked = q; return Promise.resolve({ data: { synced: '[00:01.00] Hallo' } }); },
+    info: function () { return Promise.resolve({ data: null }); }
+  }
 });
 
 server.start(0).then(function (port) {
@@ -60,10 +86,28 @@ server.start(0).then(function (port) {
     assert.strictEqual(r[0].status, 200);
     assert.ok(/text\/html/.test(r[0].type));
     assert.strictEqual(r[1].status, 200);
-    assert.deepStrictEqual(JSON.parse(r[2].body), { accentMode: 'cover' });
+    assert.deepStrictEqual(JSON.parse(r[2].body), { accentMode: 'cover', lyricsInline: false });
     assert.strictEqual(r[3].status, 404, 'kein Zugriff außerhalb von app/');
     assert.strictEqual(r[4].status, 404, 'kein Zugriff außerhalb von app/ (kodiert)');
     assert.strictEqual(r[5].type, 'font/woff2');
+    return Promise.all([
+      post(port, '/api/settings', JSON.stringify({ lyricsInline: true })),
+      post(port, '/api/settings', 'kein json'),
+      post(port, '/app.js', ''),
+      post(port, '/api/settings', JSON.stringify({ lyricsInline: false }), 'text/plain'),
+      get(port, '/api/lyrics?artist=A&title=B&duration=120'),
+      get(port, '/api/info?artist=A')
+    ]);
+  }).then(function (r) {
+    assert.strictEqual(JSON.parse(r[0].body).lyricsInline, true, 'Einstellung per POST');
+    assert.strictEqual(r[1].status, 400);
+    assert.strictEqual(r[2].status, 405, 'sonst kein POST');
+    assert.strictEqual(r[3].status, 415, 'nur JSON (keine Formulare fremder Seiten)');
+    assert.strictEqual(themeSettings.lyricsInline, true);
+    assert.strictEqual(JSON.parse(r[4].body).data.synced, '[00:01.00] Hallo');
+    assert.strictEqual(asked.title, 'B');
+    assert.strictEqual(asked.duration, '120');
+    assert.deepStrictEqual(JSON.parse(r[5].body), { data: null });
   });
 }).then(function () {
   return server.stop();

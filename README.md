@@ -9,19 +9,29 @@ works for every audio source.
 
 ![Player on a 1480×320 display](docs/screenshots/device-player.png)
 
-<sub>All device screenshots were rendered on a Raspberry Pi 5 running Volumio 4 at the display's
-native 1480×320 resolution, using the built-in demo mode (generated cover art, no real library).</sub>
+The accent colour, the background and the analyzer follow the album art – here a track change
+from Moby to ABBA:
+
+![Track change: colours follow the album art](docs/screenshots/track-change.gif)
+
+<sub>Screenshots rendered at the display's native 1480×320 resolution with the built-in demo mode,
+playing albums from a real library (album art © the respective rights holders). Lyrics from
+LRCLIB.</sub>
 
 ## Screenshots
 
 | | |
 | --- | --- |
-| ![Queue](docs/screenshots/device-queue.png) | ![Library](docs/screenshots/device-library.png) |
-| Queue in the side panel | Library with album list |
-| ![Live filter](docs/screenshots/device-filter.png) | ![Zones & outputs](docs/screenshots/device-zones.png) |
-| Live filter with the on-screen keyboard | Zones & outputs |
-| ![Settings](docs/screenshots/device-settings.png) | ![Idle screen](docs/screenshots/device-idle.png) |
-| Volumio settings, library update, restart | Idle screen |
+| ![ABBA – Arrival](docs/screenshots/device-player-abba.png) | ![VFD display style](docs/screenshots/device-vfd.png) |
+| Another album, another accent colour; the current lyrics line runs over the analyzer | Display style “VFD” (vacuum fluorescent display) |
+| ![Lyrics](docs/screenshots/device-lyrics.png) | ![Queue](docs/screenshots/device-queue.png) |
+| Time-synced lyrics (tap a line to jump there) | Queue in the side panel |
+| ![Library](docs/screenshots/device-library.png) | ![Live filter](docs/screenshots/device-filter.png) |
+| Library with album list | Live filter with the on-screen keyboard |
+| ![Zones & outputs](docs/screenshots/device-zones.png) | ![Settings](docs/screenshots/device-settings.png) |
+| Zones & outputs | Volumio settings, library update, restart |
+| ![Idle screen](docs/screenshots/device-idle.png) | |
+| Idle screen | |
 
 <table>
   <tr>
@@ -41,7 +51,12 @@ native 1480×320 resolution, using the built-in demo mode (generated cover art, 
   one), volume
 - **Band analyzer** – 64 bands (35 Hz–16 kHz) of the real audio signal behind the position slider,
   for **every source**: library, web radio, AirPlay, Spotify, Bluetooth … The played part glows in
-  the accent colour
+  the accent colour; glowing VFD segments or plain bars
+- **Lyrics and song info** – buttons at the left of the control bar open time-synced lyrics
+  (LRCLIB; tap a line to jump there) and Wikipedia info on track, album and artist. Optionally the
+  current line runs above the position slider, over the analyzer
+- **Display style “VFD”** – everything glows aqua green on black like a vacuum fluorescent
+  display, with a fine grid, segment analyzer and a dot-matrix cover
 - **Gestures** – swipe the cover left/right for next/previous; long-press (or ⋮) on a list entry
   opens its action menu right next to your finger
 - **Queue, library and search** in a collapsible side panel (icons only, labels optional);
@@ -52,7 +67,8 @@ native 1480×320 resolution, using the built-in demo mode (generated cover art, 
   and switchable outputs, each with its own volume
 - **Volumio settings** behind the gear icon – sources, playback, appearance, network, system,
   plugins, library update/rescan, restart and shut down. Volumio’s own pages are embedded
-- **Accent colour** taken from the album art; brighter blurred album-art background
+- **Accent colour** taken from the album art – also tints the side panel and the settings page;
+  blurred album-art background
 - **Served at `http://volumio.local`** – Volumio’s own UI stays at `http://volumio.local:3000`
 - **Idle screen** with a dimmed, centred clock while nothing is playing
 - Kiosk-friendly: hidden cursor, no zoom, no context menu, no overscroll
@@ -97,20 +113,20 @@ To update later, copy the new files and run `volumio plugin update` on the devic
 | Accent colour | from album art | or a fixed colour |
 | Fixed / fallback colour | `#3ddc97` | also used when no colour can be derived |
 | Background | blurred album art | “Plain dark” is lighter on slow hardware |
+| Display style | Standard | “VFD” looks like a vacuum fluorescent display: aqua glow on black, segment analyzer, monochrome cover |
 | Scrolling text | on | long titles scroll instead of being cut off |
 | 24-hour clock | on | |
 | Menu icon labels | off | show names below the panel icons |
 | Side panel expanded | off | start with queue, library and search expanded instead of only the icon bar |
-| Panel style | Transparent | or “Liquid Glass” with sheen and a light edge |
 | Panel opacity | 40 % | 0 = fully transparent, 100 = opaque |
+| Lyrics in the player | off | current lyrics line above the position slider; also a toggle in the control bar |
 | Band analyzer | on | takes effect the next time playback starts |
-| Analyzer delay library & web radio | 0 ms | only needed if the bars run ahead of the sound |
-| Analyzer delay AirPlay, Spotify & co. | 0 ms | separate value for sources outside MPD |
+| Analyzer style | VFD (segments) | or plain bars, or the same as the display style |
 | Built-in on-screen keyboard | on | touch devices only |
 | Hide mouse cursor | on | kiosk only |
 | Idle screen after | 300 s | 0 = off |
 
-Appearance changes reach the display within 20 seconds without a restart.
+Appearance changes reach every display immediately, without a restart.
 
 ## How it works
 

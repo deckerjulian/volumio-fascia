@@ -54,6 +54,9 @@
     restart: 'M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8zm-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34C4.9 8.79 4 10.79 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91z',
     check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
     heart: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+    lyrics: 'M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zM6 12h8v2H6zm0-3h12v2H6zm0-3h12v2H6z',
+    subtitles: 'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10 0h2v2h-2zm-6-4h8v2h-8z',
+    info: 'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
     backspace: 'M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z'
   };
 
@@ -83,7 +86,13 @@
       outputs: 'Ausgänge', noDevices: 'Keine weiteren Volumio-Geräte im Netzwerk', outputVia: 'Ausgabe über {name}',
       unmute: 'Ton an', updateLibrary: 'Bibliothek aktualisieren', rescanLibrary: 'Bibliothek neu einlesen',
       rescanTitle: 'Bibliothek komplett neu einlesen?', rescanSub: 'Das kann bei großen Sammlungen eine Weile dauern.',
-      libraryUpdating: 'Bibliothek wird aktualisiert …', libraryRescanning: 'Bibliothek wird neu eingelesen …'
+      libraryUpdating: 'Bibliothek wird aktualisiert …', libraryRescanning: 'Bibliothek wird neu eingelesen …',
+      lyrics: 'Songtext', songInfo: 'Infos', lyricsInline: 'Songtext im Player',
+      noLyrics: 'Kein Songtext gefunden', instrumental: 'Instrumental', noInfo: 'Keine Infos gefunden',
+      noConnection: 'Keine Verbindung', noConnectionHint: 'Volumio braucht dafür Internet.',
+      lyricsNotSynced: 'Dieser Songtext läuft nicht mit.', infoTrack: 'Titel', infoAlbum: 'Album', infoArtist: 'Künstler',
+      lyricsSource: 'Songtext: LRCLIB', infoSource: 'Quelle: Wikipedia (CC BY-SA 4.0)',
+      noSyncedLyrics: 'Zu diesem Titel gibt es keinen mitlaufenden Songtext'
     },
     en: {
       queue: 'Queue', library: 'Library', search: 'Search', live: 'LIVE',
@@ -106,7 +115,13 @@
       outputs: 'Outputs', noDevices: 'No other Volumio devices on the network', outputVia: 'Output via {name}',
       unmute: 'Unmute', updateLibrary: 'Update library', rescanLibrary: 'Rescan library',
       rescanTitle: 'Rescan the whole library?', rescanSub: 'This can take a while for large collections.',
-      libraryUpdating: 'Updating library …', libraryRescanning: 'Rescanning library …'
+      libraryUpdating: 'Updating library …', libraryRescanning: 'Rescanning library …',
+      lyrics: 'Lyrics', songInfo: 'Info', lyricsInline: 'Lyrics in the player',
+      noLyrics: 'No lyrics found', instrumental: 'Instrumental', noInfo: 'No info found',
+      noConnection: 'No connection', noConnectionHint: 'Volumio needs internet access for this.',
+      lyricsNotSynced: 'These lyrics are not time-synced.', infoTrack: 'Track', infoAlbum: 'Album', infoArtist: 'Artist',
+      lyricsSource: 'Lyrics: LRCLIB', infoSource: 'Source: Wikipedia (CC BY-SA 4.0)',
+      noSyncedLyrics: 'No time-synced lyrics for this track'
     }
   };
 
@@ -122,11 +137,11 @@
     clock24h: true,
     tabLabels: false,
     panelOpen: false,
-    panelStyle: 'transparent',
     panelOpacity: 40,
-    analyzer: true,
-    analyzerDelayMpd: 0,
-    analyzerDelayOther: 0
+    displayStyle: 'standard',
+    analyzerStyle: 'vfd',
+    lyricsInline: false,
+    analyzer: true
   };
 
   var settings = Object.assign({}, DEFAULTS);
@@ -212,7 +227,10 @@
     sheet: $('sheet'), sheetTitle: $('sheet-title'), sheetSub: $('sheet-sub'), sheetActions: $('sheet-actions'),
     toast: $('toast'),
     idle: $('idle'), idleInner: $('idle-inner'), idleClock: $('idle-clock'), idleDate: $('idle-date'), idleTrack: $('idle-track'),
-    offline: $('offline')
+    offline: $('offline'),
+    lyricsBtn: $('btn-lyrics'), infoBtn: $('btn-info'), lyricsSwitch: $('btn-lyrics-inline'),
+    lyricInline: document.querySelector('#lyric-inline span'),
+    songInfo: $('songinfo'), siLyrics: $('si-lyrics'), siInfo: $('si-info'), siClose: $('si-close')
   };
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-icon]'), function (el) {
@@ -282,6 +300,8 @@
     });
     socket.on('disconnect', function () { setOnline(false); });
     socket.on('pushState', onState);
+    // Das Plugin schickt geänderte Einstellungen sofort an alle Anzeigen
+    socket.on('pushTouchBarSettings', applySettings);
     socket.on('pushQueue', onQueue);
     socket.on('pushBrowseSources', onSources);
     socket.on('pushBrowseLibrary', onBrowse);
@@ -335,7 +355,7 @@
     // Start-Zustand der Menüleiste; danach nur, wenn die Einstellung geändert wurde
     if (!settingsLoaded || !!settings.panelOpen !== !!prevPanelOpen) setPanelLevel(settings.panelOpen ? 1 : 0);
     settingsLoaded = true;
-    ['accentMode', 'accentColor', 'background', 'panelStyle'].forEach(function (k) {
+    ['accentMode', 'accentColor', 'background', 'displayStyle', 'analyzerStyle'].forEach(function (k) {
       if (params.has(k)) settings[k] = params.get(k);
     });
 
@@ -344,8 +364,13 @@
 
     els.body.classList.toggle('bg-solid', settings.background === 'solid');
     els.body.classList.toggle('tab-labels', !!settings.tabLabels);
-    els.body.classList.toggle('glass', settings.panelStyle === 'glass');
+    els.body.classList.toggle('vfd', settings.displayStyle === 'vfd');
+    // Analyzer aus Segmenten: eigene Wahl oder wie der Anzeigestil
+    var segments = settings.analyzerStyle === 'vfd' || (settings.analyzerStyle !== 'normal' && settings.displayStyle === 'vfd');
+    els.body.classList.toggle('seg-analyzer', segments);
+    spectrum.blank = false;
     document.documentElement.style.setProperty('--panel-alpha', percent(settings.panelOpacity, DEFAULTS.panelOpacity));
+    applyLyricsInline();
     els.body.classList.toggle('no-cursor', !!(settings.hideCursor && KIOSK));
     [els.searchInput, els.filterInput].forEach(function (input) {
       input.setAttribute('inputmode', builtinKeyboard() ? 'none' : 'search');
@@ -397,8 +422,12 @@
     root.setProperty('--surface-rgb', surface.join(', '));
   }
 
+  // Anzeigestil VFD: immer die typische türkisgrüne Leuchtfarbe
+  var VFD_COLOR = '#46f2d3';
+
   function updateAccent() {
     var c = settings.accentMode === 'cover' && coverAccent ? coverAccent : settings.accentColor;
+    if (settings.displayStyle === 'vfd') c = VFD_COLOR;
     setAccent(c || DEFAULTS.accentColor);
   }
 
@@ -615,6 +644,7 @@
     lastSecond = -1;
     updateProgress();
     if (typeof syncSelfZone === 'function') syncSelfZone();
+    if (trackKey() !== song.key) onTrackChange();
   }
 
   function renderQuality(live) {
@@ -654,20 +684,22 @@
     // Die Einstellungsseite verdeckt den Player; solange muss er nichts zeichnen
     if (now - lastFrame >= 32 && !document.hidden && !els.body.classList.contains('system-open')) {
       lastFrame = now;
-      if (isPlaying()) updateProgress();
-      if (spectrum.source) drawSpectrum(now);
+      // Songtext und Infos verdecken ihn auch; dort läuft nur der Songtext weiter
+      var covered = songView.open;
+      if (isPlaying() && !covered) updateProgress();
+      if (spectrum.source && !covered) drawSpectrum();
+      if (song.lines) updateLyrics(false);
     }
     requestAnimationFrame(frame);
   }
 
   // ================================================================ Band-Analyzer
 
-  // Das Plugin liest den Ton aus einem FIFO-Ausgang von MPD und schickt 64 Bandpegel (0–99)
-  // per Server-Sent Events. Angezeigt wird mit Verzögerung, weil der Ton erst den Audiopuffer
-  // durchläuft, bevor er zu hören ist.
+  // Das Plugin greift den Ton direkt vor dem DAC ab und schickt 64 Bandpegel (0–99) per
+  // Server-Sent Events; sie werden sofort angezeigt.
   var BANDS = 64;
   var spectrum = {
-    canvas: $('spectrum'), ctx: null, source: null, queue: [], target: null,
+    canvas: $('spectrum'), ctx: null, source: null, target: null,
     bars: 0, cur: null, peak: null, w: 0, h: 0, dpr: 1, blank: false, styles: null, stylesFor: ''
   };
 
@@ -707,12 +739,7 @@
   }
 
   function pushSpectrum(line) {
-    var values = line === '0' ? null : line.split(',').map(Number);
-    // Bibliothek/Webradio laufen über MPD, AirPlay, Spotify & Co. über eigene Programme
-    var viaMpd = state.service === 'mpd' || state.service === 'webradio';
-    var delay = Number(viaMpd ? settings.analyzerDelayMpd : settings.analyzerDelayOther) || 0;
-    spectrum.queue.push({ at: performance.now() + delay, v: values });
-    if (spectrum.queue.length > 200) spectrum.queue.shift();
+    spectrum.target = line === '0' ? null : line.split(',').map(Number);
   }
 
   function sizeSpectrum() {
@@ -737,10 +764,56 @@
     spectrum.blank = false;
   }
 
-  function drawSpectrum(now) {
+  // VFD: Balken aus einzelnen Leuchtsegmenten; unbeleuchtete Segmente glimmen schwach. Das
+  // Leuchten ist ein breiterer, durchscheinender Balken dahinter (shadowBlur wäre ohne GPU zu teuer).
+  function drawSegments(ctx, W, H, n, cur, peak, played) {
+    var pitch = W / n;
+    var gap = Math.max(2, pitch * 0.3);
+    var bw = pitch - gap;
+    var step = 4.5;
+    var rows = Math.floor(H / step);
+    var c = accentRgb;
+    function bars(level, playedPart, pad) {
+      ctx.beginPath();
+      for (var j = 0; j < n; j++) {
+        var x = j * pitch + gap / 2;
+        if (playedPart != null && (x + bw / 2 <= played) !== playedPart) continue;
+        var h = Math.round(level(j) * rows) * step;
+        if (h > 0) ctx.rect(x - pad, H - h - pad, bw + 2 * pad, h + pad);
+      }
+    }
+    bars(function () { return 1; }, null, 0);
+    ctx.fillStyle = 'rgba(' + c + ',.07)';
+    ctx.fill();
+    var lit = function (j) { return cur[j]; };
+    bars(lit, null, 1.5);
+    ctx.fillStyle = 'rgba(' + c + ',.18)';
+    ctx.fill();
+    bars(lit, true, 0);
+    ctx.fillStyle = 'rgb(' + c + ')';
+    ctx.fill();
+    bars(lit, false, 0);
+    ctx.fillStyle = 'rgba(' + c + ',.45)';
+    ctx.fill();
+    // Spitzen: je ein einzelnes Segment
+    ctx.beginPath();
+    for (var p = 0; p < n; p++) {
+      if (peak[p] < 0.03) continue;
+      var r = Math.max(1, Math.round(peak[p] * rows));
+      ctx.rect(p * pitch + gap / 2, H - r * step, bw, step);
+    }
+    ctx.fillStyle = 'rgba(' + c + ',.8)';
+    ctx.fill();
+    // Fugen zwischen den Segmenten ausschneiden
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    for (var y = H - step; y > -step; y -= step) ctx.rect(0, y - 1.5, W, 1.5);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawSpectrum() {
     if (!spectrum.ctx || !spectrum.bars) return;
-    var q = spectrum.queue;
-    while (q.length && q[0].at <= now) spectrum.target = q.shift().v;
 
     var n = spectrum.bars;
     var cur = spectrum.cur;
@@ -763,12 +836,15 @@
     if (!moving && spectrum.blank) return;
     spectrum.blank = !moving;
 
-    if (spectrum.stylesFor !== accentRgb) {
-      spectrum.stylesFor = accentRgb;
-      // Gespielter Teil in der Akzentfarbe, Rest neutral weiß: hebt sich von jedem Cover-Hintergrund ab
+    var styleKey = accentRgb + (els.body.classList.contains('vfd') ? ' vfd' : '');
+    if (spectrum.stylesFor !== styleKey) {
+      spectrum.stylesFor = styleKey;
+      // Gespielter Teil in der Akzentfarbe, Rest neutral weiß: hebt sich von jedem Cover-Hintergrund ab.
+      // Auf der VFD-Anzeige glimmt der Rest gedämpft in der Leuchtfarbe.
+      var rest = styleKey.indexOf(' vfd') !== -1 ? accentRgb : '255,255,255';
       spectrum.styles = [
-        'rgba(' + accentRgb + ',.85)', 'rgba(255,255,255,.2)',
-        'rgba(' + accentRgb + ',1)', 'rgba(255,255,255,.45)'
+        'rgba(' + accentRgb + ',.85)', 'rgba(' + rest + ',.2)',
+        'rgba(' + accentRgb + ',1)', 'rgba(' + rest + ',.45)'
       ];
     }
     var ctx = spectrum.ctx;
@@ -779,6 +855,7 @@
 
     // Schon gespielter Teil leuchtet in der Akzentfarbe, der Rest gedämpft
     var played = els.body.classList.contains('is-live') ? W : Math.max(0, seekSlider.value) * W;
+    if (els.body.classList.contains('seg-analyzer')) return drawSegments(ctx, W, H, n, cur, peak, played);
     var pitch = W / n;
     var gap = Math.max(2, pitch * 0.3);
     var bw = pitch - gap;
@@ -1125,8 +1202,18 @@
 
   function maxPanelLevel() { return landscapeQuery.matches ? 1 : 2; }
 
+  // Kurze Hochformat-Bildschirme (Handy, Tablet hochkant): in der mittleren Stufe bliebe für die
+  // Liste kaum Platz (eine Zeile), daher dort gleich die große Liste mit Mini-Player
+  function skipMiddleLevel() {
+    if (landscapeQuery.matches) return false;
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    return window.innerHeight / rem < 62;
+  }
+
   function setPanelLevel(level) {
-    panelLevel = Math.max(0, Math.min(maxPanelLevel(), level));
+    level = Math.max(0, Math.min(maxPanelLevel(), level));
+    if (level === 1 && skipMiddleLevel()) level = panelLevel === 2 ? 0 : 2;
+    panelLevel = level;
     els.body.classList.toggle('panel-collapsed', panelLevel === 0);
     els.body.classList.toggle('expanded', panelLevel === 2);
     els.panelUp.hidden = panelLevel >= maxPanelLevel();
@@ -1201,8 +1288,10 @@
     });
     var touched = Number(els.queueList.dataset.touched) || 0;
     if (scrollIntoView && currentRow && activeTab === 'queue' && Date.now() - touched > 8000) {
+      // Relativ zur Liste rechnen: offsetTop bezieht sich auf #app und enthält im Hochformat den Player
       var list = els.queueList;
-      list.scrollTop = currentRow.offsetTop - list.clientHeight / 2 + currentRow.offsetHeight / 2;
+      var top = currentRow.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+      list.scrollTop = top - list.clientHeight / 2 + currentRow.offsetHeight / 2;
     }
   }
 
@@ -1793,6 +1882,282 @@
   els.btnSystem.addEventListener('click', openSystem);
   els.systemBack.addEventListener('click', showSystemMenu);
   els.systemClose.addEventListener('click', closeSystem);
+
+  // ================================================================ Songtext & Infos
+
+  // Songtexte kommen von LRCLIB (mit Zeitstempeln laufen sie mit), Infos von Wikipedia. Beides
+  // holt der Theme-Server und speichert es zwischen (lib/songinfo.js).
+  var song = { key: null, lyrics: null, lyricsFor: null, info: null, infoFor: null, lines: null, index: -1 };
+  var songView = { open: false, view: 'lyrics', manualAt: 0 };
+  // Zeile minimal vor ihrem Zeitstempel zeigen: wirkt mitlaufend statt nachhinkend
+  var LYRIC_LEAD = 250;
+
+  function trackKey() { return [state.artist || '', state.title || '', state.album || ''].join('\n'); }
+
+  function trackQuery() {
+    return new URLSearchParams({
+      artist: state.artist || '', title: state.title || '', album: state.album || '',
+      duration: String(Number(state.duration) || 0), lang: lang
+    }).toString();
+  }
+
+  function getJson(url) {
+    return fetch(url, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : { offline: true }; })
+      .catch(function () { return { offline: true }; });
+  }
+
+  function onTrackChange() {
+    song.key = trackKey();
+    song.lyrics = song.info = song.lines = null;
+    song.lyricsFor = song.infoFor = null;
+    song.index = -1;
+    setInlineLyric('');
+    // Webradio: Zeilen laufen nicht mit (keine Position im Titel), also nur für den Dialog laden
+    if ((settings.lyricsInline && !isLive()) || (songView.open && songView.view === 'lyrics')) loadLyrics();
+    if (songView.open) showSongView(songView.view);
+  }
+
+  // LRC: "[01:23.45] Text", auch mehrere Zeitstempel pro Zeile und "[offset:+200]"
+  function parseLrc(text) {
+    var lines = [];
+    var offset = 0;
+    String(text).split(/\r?\n/).forEach(function (row) {
+      var m = row.match(/^\[offset:\s*([+-]?\d+)\]/i);
+      if (m) {
+        offset = Number(m[1]);
+        return;
+      }
+      var stamps = [];
+      var rest = row.replace(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g, function (_, mm, ss) {
+        stamps.push((Number(mm) * 60 + Number(ss.replace(':', '.'))) * 1000);
+        return '';
+      });
+      stamps.forEach(function (ms) { lines.push({ t: ms, text: rest.trim() }); });
+    });
+    lines.forEach(function (l) { l.t -= offset; });
+    lines.sort(function (a, b) { return a.t - b.t; });
+    return lines.length ? lines : null;
+  }
+
+  function loadLyrics() {
+    var key = song.key;
+    if (!state.title || song.lyricsFor === key) return;
+    song.lyricsFor = key;
+    song.lyrics = { loading: true };
+    renderLyrics();
+    getJson('api/lyrics?' + trackQuery()).then(function (r) {
+      if (song.key !== key) return;
+      song.lyrics = r;
+      if (r.offline) {
+        // Z. B. Internet nach dem Start noch nicht da: für den Songtext im Player erneut versuchen
+        song.lyricsFor = null;
+        setTimeout(function () {
+          if (song.key === key && settings.lyricsInline && !isLive()) loadLyrics();
+        }, 30000);
+      }
+      song.lines = r.data && r.data.synced && !isLive() ? parseLrc(r.data.synced) : null;
+      song.index = -1;
+      renderLyrics();
+      updateLyrics(true);
+      lyricsFeedback();
+    });
+  }
+
+  function loadInfo() {
+    var key = song.key;
+    if ((!state.title && !state.artist) || song.infoFor === key) return;
+    song.infoFor = key;
+    song.info = { loading: true };
+    renderInfo();
+    getJson('api/info?' + trackQuery()).then(function (r) {
+      if (song.key !== key) return;
+      song.info = r;
+      if (r.offline) song.infoFor = null;
+      renderInfo();
+    });
+  }
+
+  function updateLyrics(force) {
+    var lines = song.lines;
+    if (!lines) return;
+    var ms = elapsedMs() + LYRIC_LEAD;
+    var i = song.index;
+    if (i < 0 || lines[i].t > ms || (i + 1 < lines.length && lines[i + 1].t <= ms)) {
+      i = -1;
+      for (var k = 0; k < lines.length && lines[k].t <= ms; k++) i = k;
+    }
+    if (i === song.index && !force) return;
+    song.index = i;
+    setInlineLyric(i >= 0 ? lines[i].text : '');
+    if (songView.open && songView.view === 'lyrics') highlightLyric(i, force);
+  }
+
+  // Aktuelle Zeile über dem Positionsregler (über den Analyzer-Balken)
+  var inlineText = null;
+  function setInlineLyric(text) {
+    if (!settings.lyricsInline || isLive()) text = '';
+    if (text === inlineText) return;
+    inlineText = text;
+    els.body.classList.toggle('has-lyric', !!text);
+    var span = els.lyricInline;
+    clearTimeout(setInlineLyric.timer);
+    span.classList.add('out');
+    setInlineLyric.timer = setTimeout(function () {
+      span.textContent = text;
+      span.classList.remove('out');
+    }, 180);
+  }
+
+  // Nach dem Einschalten Bescheid geben, wenn zu diesem Titel kein mitlaufender Text da ist
+  var wantFeedback = false;
+  function lyricsFeedback() {
+    if (!wantFeedback || !song.lyrics || song.lyrics.loading) return;
+    wantFeedback = false;
+    if (!song.lines && state.title) toast(t('noSyncedLyrics'));
+  }
+
+  function applyLyricsInline() {
+    var on = !!settings.lyricsInline;
+    els.body.classList.toggle('lyrics-inline', on);
+    els.lyricsSwitch.classList.toggle('on', on);
+    els.lyricsSwitch.setAttribute('aria-pressed', String(on));
+    if (on && !isLive()) loadLyrics();
+    song.index = -1;
+    if (song.lines) updateLyrics(true);
+    else setInlineLyric('');
+  }
+
+  // Umschalter in der Bedienleiste: speichert die Einstellung, damit alle Anzeigen sie übernehmen
+  els.lyricsSwitch.addEventListener('click', function () {
+    settings.lyricsInline = !settings.lyricsInline;
+    wantFeedback = settings.lyricsInline;
+    applyLyricsInline();
+    lyricsFeedback();
+    fetch('api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lyricsInline: settings.lyricsInline })
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (s) { if (s) applySettings(s); })
+      .catch(function () { /* bleibt lokal umgeschaltet */ });
+  });
+
+  // Titel und Künstler über Songtext und Infos (im Querformat hat die Leiste keinen Platz dafür)
+  function songHead() {
+    return '<div class="si-head"><b>' + esc(state.title || '') + '</b>' +
+      (state.artist ? '<span>' + esc(state.artist) + '</span>' : '') + '</div>';
+  }
+
+  function renderLyrics() {
+    if (!songView.open) return;
+    var box = els.siLyrics;
+    var r = song.lyrics;
+    var d = r && r.data;
+    box.classList.toggle('synced', !!song.lines);
+    if (!state.title) box.innerHTML = emptyHtml('lyrics', t('nothingPlaying'));
+    else if (!r || r.loading) box.innerHTML = songHead() + LOADING;
+    else if (r.offline) box.innerHTML = songHead() + emptyHtml('lyrics', t('noConnection'), t('noConnectionHint'));
+    else if (song.lines) {
+      box.innerHTML = songHead() + song.lines.map(function (l, i) {
+        return '<p class="ly' + (l.text ? '' : ' gap') + '" data-i="' + i + '">' + (esc(l.text) || '♪') + '</p>';
+      }).join('') + '<p class="si-source">' + esc(t('lyricsSource')) + '</p>';
+    } else if (d && (d.plain || d.synced)) {
+      var plain = d.plain || d.synced.replace(/\[[^\]]*\]\s*/g, '');
+      box.innerHTML = songHead() + '<p class="si-note">' + esc(t('lyricsNotSynced')) + '</p><p class="ly-plain">' + esc(plain) + '</p>' +
+        '<p class="si-source">' + esc(t('lyricsSource')) + '</p>';
+    } else box.innerHTML = songHead() + emptyHtml('lyrics', d && d.instrumental ? t('instrumental') : t('noLyrics'));
+  }
+
+  function highlightLyric(i, instant) {
+    var box = els.siLyrics;
+    var prev = box.querySelector('.ly.on');
+    if (prev) prev.classList.remove('on');
+    var el = i >= 0 ? box.querySelector('.ly[data-i="' + i + '"]') : null;
+    if (!el) return;
+    el.classList.add('on');
+    // Nach eigenem Scrollen kurz nicht zurückspringen
+    if (Date.now() - songView.manualAt < 4000) return;
+    box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.offsetHeight / 2, behavior: instant ? 'auto' : 'smooth' });
+  }
+
+  function renderInfo() {
+    if (!songView.open) return;
+    var box = els.siInfo;
+    var r = song.info;
+    var d = r && r.data;
+    if (!state.title && !state.artist) box.innerHTML = emptyHtml('info', t('nothingPlaying'));
+    else if (!r || r.loading) box.innerHTML = songHead() + LOADING;
+    else if (r.offline) box.innerHTML = songHead() + emptyHtml('info', t('noConnection'), t('noConnectionHint'));
+    else if (!d) box.innerHTML = songHead() + emptyHtml('info', t('noInfo'));
+    else {
+      var kinds = { track: 'infoTrack', album: 'infoAlbum', artist: 'infoArtist' };
+      box.innerHTML = songHead() + '<div class="si-cards">' + d.sections.map(function (s) {
+        return '<article class="si-card">' + (s.thumb ? '<img src="' + esc(s.thumb) + '" alt="" loading="lazy">' : '') +
+          '<div><div class="si-kind">' + esc(t(kinds[s.kind])) + '</div><h3>' + esc(s.title.replace(/\s*\([^)]*\)$/, '')) + '</h3>' +
+          (s.description ? '<div class="si-desc">' + esc(s.description) + '</div>' : '') +
+          '<p>' + esc(s.extract) + '</p></div></article>';
+      }).join('') + '</div><p class="si-source">' + esc(t('infoSource')) + '</p>';
+    }
+  }
+
+  function showSongView(view) {
+    songView.view = view;
+    els.songInfo.dataset.view = view;
+    Array.prototype.forEach.call(els.songInfo.querySelectorAll('.si-tab'), function (b) {
+      b.classList.toggle('on', b.dataset.view === view);
+    });
+    if (view === 'lyrics') {
+      loadLyrics();
+      renderLyrics();
+      songView.manualAt = 0;
+      song.index = -1;
+      updateLyrics(true);
+    } else {
+      loadInfo();
+      renderInfo();
+    }
+  }
+
+  function openSongInfo(view) {
+    closeKeyboard();
+    closeSheet();
+    songView.open = true;
+    els.songInfo.classList.add('open');
+    showSongView(view);
+  }
+
+  function closeSongInfo() {
+    songView.open = false;
+    els.songInfo.classList.remove('open');
+    updateProgress();
+  }
+
+  els.lyricsBtn.addEventListener('click', function () { openSongInfo('lyrics'); });
+  els.infoBtn.addEventListener('click', function () { openSongInfo('info'); });
+  els.siClose.addEventListener('click', closeSongInfo);
+  Array.prototype.forEach.call(els.songInfo.querySelectorAll('.si-tab'), function (b) {
+    b.addEventListener('click', function () { showSongView(b.dataset.view); });
+  });
+  ['pointerdown', 'wheel', 'touchstart', 'touchmove'].forEach(function (ev) {
+    els.siLyrics.addEventListener(ev, function () { songView.manualAt = Date.now(); }, { passive: true });
+  });
+  els.siLyrics.addEventListener('pointermove', function (e) {
+    if (e.buttons) songView.manualAt = Date.now();
+  }, { passive: true });
+  // Tipp auf eine Zeile springt dorthin
+  els.siLyrics.addEventListener('click', function (e) {
+    var el = e.target.closest('.ly');
+    if (!el || !song.lines || isLive()) return;
+    // Aufrunden: Volumio springt nur auf ganze Sekunden, so landet es nie vor der Zeile
+    var sec = Math.max(0, Math.ceil(song.lines[+el.dataset.i].t / 1000));
+    seekBase.ms = sec * 1000;
+    seekBase.at = performance.now();
+    lastSecond = -1;
+    emit('seek', sec);
+    songView.manualAt = 0;
+    updateLyrics(true);
+  });
 
   // ================================================================ Zonen & Ausgänge
 

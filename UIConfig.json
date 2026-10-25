@@ -83,15 +83,15 @@
           "accentMode",
           "accentColor",
           "background",
+          "displayStyle",
           "marquee",
           "clock24h",
           "tabLabels",
           "panelOpen",
-          "panelStyle",
           "panelOpacity",
+          "lyricsInline",
           "analyzer",
-          "analyzerDelayMpd",
-          "analyzerDelayOther"
+          "analyzerStyle"
         ]
       },
       "content": [
@@ -144,6 +144,26 @@
           ]
         },
         {
+          "id": "displayStyle",
+          "element": "select",
+          "label": "TRANSLATE.DISPLAY_STYLE",
+          "doc": "TRANSLATE.DISPLAY_STYLE_DOC",
+          "value": {
+            "value": "standard",
+            "label": "TRANSLATE.DISPLAY_STANDARD"
+          },
+          "options": [
+            {
+              "value": "standard",
+              "label": "TRANSLATE.DISPLAY_STANDARD"
+            },
+            {
+              "value": "vfd",
+              "label": "TRANSLATE.DISPLAY_VFD"
+            }
+          ]
+        },
+        {
           "id": "marquee",
           "element": "switch",
           "label": "TRANSLATE.MARQUEE",
@@ -171,26 +191,6 @@
           "value": false
         },
         {
-          "id": "panelStyle",
-          "element": "select",
-          "label": "TRANSLATE.PANEL_STYLE",
-          "doc": "TRANSLATE.PANEL_STYLE_DOC",
-          "value": {
-            "value": "transparent",
-            "label": "TRANSLATE.PANEL_STYLE_TRANSPARENT"
-          },
-          "options": [
-            {
-              "value": "transparent",
-              "label": "TRANSLATE.PANEL_STYLE_TRANSPARENT"
-            },
-            {
-              "value": "glass",
-              "label": "TRANSLATE.PANEL_STYLE_GLASS"
-            }
-          ]
-        },
-        {
           "id": "panelOpacity",
           "element": "input",
           "type": "number",
@@ -207,6 +207,13 @@
           "value": 40
         },
         {
+          "id": "lyricsInline",
+          "element": "switch",
+          "label": "TRANSLATE.LYRICS_INLINE",
+          "doc": "TRANSLATE.LYRICS_INLINE_DOC",
+          "value": false
+        },
+        {
           "id": "analyzer",
           "element": "switch",
           "label": "TRANSLATE.ANALYZER",
@@ -214,36 +221,28 @@
           "value": true
         },
         {
-          "id": "analyzerDelayMpd",
-          "element": "input",
-          "type": "number",
-          "label": "TRANSLATE.ANALYZER_DELAY_MPD",
-          "doc": "TRANSLATE.ANALYZER_DELAY_DOC",
-          "attributes": [
+          "id": "analyzerStyle",
+          "element": "select",
+          "label": "TRANSLATE.ANALYZER_STYLE",
+          "doc": "TRANSLATE.ANALYZER_STYLE_DOC",
+          "value": {
+            "value": "vfd",
+            "label": "TRANSLATE.ANALYZER_STYLE_VFD"
+          },
+          "options": [
             {
-              "min": 0
+              "value": "auto",
+              "label": "TRANSLATE.ANALYZER_STYLE_AUTO"
             },
             {
-              "max": 3000
-            }
-          ],
-          "value": 0
-        },
-        {
-          "id": "analyzerDelayOther",
-          "element": "input",
-          "type": "number",
-          "label": "TRANSLATE.ANALYZER_DELAY_OTHER",
-          "doc": "TRANSLATE.ANALYZER_DELAY_DOC",
-          "attributes": [
-            {
-              "min": 0
+              "value": "normal",
+              "label": "TRANSLATE.ANALYZER_STYLE_NORMAL"
             },
             {
-              "max": 3000
+              "value": "vfd",
+              "label": "TRANSLATE.ANALYZER_STYLE_VFD"
             }
-          ],
-          "value": 0
+          ]
         }
       ]
     },

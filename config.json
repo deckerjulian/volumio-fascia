@@ -12,9 +12,9 @@
   "clock24h": { "type": "boolean", "value": true },
   "tabLabels": { "type": "boolean", "value": false },
   "panelOpen": { "type": "boolean", "value": false },
-  "panelStyle": { "type": "string", "value": "transparent" },
+  "displayStyle": { "type": "string", "value": "standard" },
+  "analyzerStyle": { "type": "string", "value": "vfd" },
   "panelOpacity": { "type": "number", "value": 40 },
-  "analyzer": { "type": "boolean", "value": true },
-  "analyzerDelayMpd": { "type": "number", "value": 0 },
-  "analyzerDelayOther": { "type": "number", "value": 0 }
+  "lyricsInline": { "type": "boolean", "value": false },
+  "analyzer": { "type": "boolean", "value": true }
 }

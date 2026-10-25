@@ -5,6 +5,7 @@ var fs = require('fs');
 var os = require('os');
 var path = require('path');
 var createServer = require('./lib/server');
+var createSongInfo = require('./lib/songinfo');
 var execFile = require('child_process').execFile;
 var createSpectrumHub = require('./lib/spectrum');
 var kiosk = require('./lib/kiosk');
@@ -122,6 +123,15 @@ TouchBarTheme.prototype.startServer = function () {
     root: path.join(__dirname, 'app'),
     logger: self.logger,
     getSettings: function () { return self.getThemeSettings(); },
+    // Schalter in der Bedienleiste: Songtext im Player
+    onSettings: function (patch) {
+      if ('lyricsInline' in patch) self.config.set('lyricsInline', !!patch.lyricsInline);
+      self.pushSettings();
+    },
+    songInfo: createSongInfo({
+      cacheDir: self.commandRouter.pluginManager.getConfigurationFile(self.context, 'songinfo'),
+      logger: self.logger
+    }),
     onSpectrum: function (req, res) {
       if (!self.config.get('analyzer') || !self.spectrum) {
         res.writeHead(404);
@@ -158,12 +168,22 @@ TouchBarTheme.prototype.getThemeSettings = function () {
     clock24h: c.get('clock24h'),
     tabLabels: c.get('tabLabels'),
     panelOpen: c.get('panelOpen'),
-    panelStyle: c.get('panelStyle'),
+    displayStyle: c.get('displayStyle'),
+    analyzerStyle: c.get('analyzerStyle'),
     panelOpacity: c.get('panelOpacity'),
-    analyzer: c.get('analyzer'),
-    analyzerDelayMpd: c.get('analyzerDelayMpd'),
-    analyzerDelayOther: c.get('analyzerDelayOther')
+    lyricsInline: c.get('lyricsInline'),
+    analyzer: c.get('analyzer')
   };
+};
+
+// Geänderte Einstellungen sofort an alle Anzeigen (Kiosk, Handy, iOS-App) schicken, über deren
+// Verbindung zu Volumio. Sonst holen sie sie erst beim nächsten Abfragen (alle 20 s).
+TouchBarTheme.prototype.pushSettings = function () {
+  try {
+    this.commandRouter.broadcastMessage('pushTouchBarSettings', this.getThemeSettings());
+  } catch (err) {
+    this.logger.error('[touch_bar_theme] pushSettings: ' + err.message);
+  }
 };
 
 TouchBarTheme.prototype.getPublicUrl = function () {
@@ -253,11 +273,11 @@ TouchBarTheme.prototype.getUIConfig = function () {
     findField(look, 'clock24h').value = self.config.get('clock24h');
     findField(look, 'tabLabels').value = self.config.get('tabLabels');
     findField(look, 'panelOpen').value = self.config.get('panelOpen');
-    setSelect(findField(look, 'panelStyle'), self.config.get('panelStyle'));
+    setSelect(findField(look, 'displayStyle'), self.config.get('displayStyle'));
+    setSelect(findField(look, 'analyzerStyle'), self.config.get('analyzerStyle'));
     findField(look, 'panelOpacity').value = self.config.get('panelOpacity');
+    findField(look, 'lyricsInline').value = self.config.get('lyricsInline');
     findField(look, 'analyzer').value = self.config.get('analyzer');
-    findField(look, 'analyzerDelayMpd').value = self.config.get('analyzerDelayMpd');
-    findField(look, 'analyzerDelayOther').value = self.config.get('analyzerDelayOther');
 
     findField(behave, 'keyboard').value = self.config.get('keyboard');
     findField(behave, 'hideCursor').value = self.config.get('hideCursor');
@@ -321,19 +341,19 @@ TouchBarTheme.prototype.saveAppearance = function (data) {
   this.config.set('clock24h', !!data.clock24h);
   this.config.set('tabLabels', !!data.tabLabels);
   this.config.set('panelOpen', !!data.panelOpen);
-  this.config.set('panelStyle', selectValue(data.panelStyle) === 'glass' ? 'glass' : 'transparent');
+  this.config.set('displayStyle', selectValue(data.displayStyle) === 'vfd' ? 'vfd' : 'standard');
+  var analyzerStyle = selectValue(data.analyzerStyle);
+  this.config.set('analyzerStyle', analyzerStyle === 'normal' || analyzerStyle === 'auto' ? analyzerStyle : 'vfd');
   var opacity = parseInt(data.panelOpacity, 10);
   if (opacity >= 0) this.config.set('panelOpacity', Math.min(opacity, 100));
-  ['analyzerDelayMpd', 'analyzerDelayOther'].forEach(function (key) {
-    var delay = parseInt(data[key], 10);
-    this.config.set(key, delay >= 0 ? Math.min(delay, 3000) : 0);
-  }, this);
+  this.config.set('lyricsInline', !!data.lyricsInline);
   this.toast('success', this.str('PAGE_TITLE'), this.str('SAVED'));
 
   var analyzer = !!data.analyzer;
-  if (analyzer === this.config.get('analyzer')) return libQ.resolve();
+  var analyzerChanged = analyzer !== this.config.get('analyzer');
   this.config.set('analyzer', analyzer);
-  return kewify(this.syncAnalyzer());
+  this.pushSettings();
+  return analyzerChanged ? kewify(this.syncAnalyzer()) : libQ.resolve();
 };
 
 TouchBarTheme.prototype.saveBehaviour = function (data) {
@@ -343,6 +363,7 @@ TouchBarTheme.prototype.saveBehaviour = function (data) {
   this.config.set('hideCursor', !!data.hideCursor);
   this.config.set('idleTimeout', Math.min(idle, 86400));
   this.toast('success', this.str('PAGE_TITLE'), this.str('SAVED'));
+  this.pushSettings();
   return libQ.resolve();
 };
 

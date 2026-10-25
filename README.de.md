@@ -9,19 +9,28 @@ für jede Audioquelle funktioniert.
 
 ![Player auf einem 1480×320-Display](docs/screenshots/device-player.png)
 
-<sub>Alle Geräte-Screenshots wurden auf einem Raspberry Pi 5 mit Volumio 4 in der nativen
-Auflösung 1480×320 erzeugt, im eingebauten Demo-Modus (erzeugte Cover, keine echte Bibliothek).</sub>
+Akzentfarbe, Hintergrund und Analyzer richten sich nach dem Cover – hier ein Titelwechsel von
+Moby zu ABBA:
+
+![Titelwechsel: die Farben folgen dem Cover](docs/screenshots/track-change.gif)
+
+<sub>Screenshots in der nativen Auflösung 1480×320 im eingebauten Demo-Modus, mit Alben aus einer
+echten Bibliothek (Cover © der jeweiligen Rechteinhaber). Songtexte von LRCLIB.</sub>
 
 ## Screenshots
 
 | | |
 | --- | --- |
-| ![Warteschlange](docs/screenshots/device-queue.png) | ![Bibliothek](docs/screenshots/device-library.png) |
-| Warteschlange im Seitenpanel | Bibliothek mit Albenliste |
-| ![Live-Filter](docs/screenshots/device-filter.png) | ![Zonen & Ausgänge](docs/screenshots/device-zones.png) |
-| Live-Filter mit Bildschirmtastatur | Zonen & Ausgänge |
-| ![Einstellungen](docs/screenshots/device-settings.png) | ![Ruhebildschirm](docs/screenshots/device-idle.png) |
-| Volumio-Einstellungen, Bibliothek, Neustart | Ruhebildschirm |
+| ![ABBA – Arrival](docs/screenshots/device-player-abba.png) | ![Anzeigestil VFD](docs/screenshots/device-vfd.png) |
+| Anderes Album, andere Akzentfarbe; die aktuelle Songtext-Zeile läuft über dem Analyzer | Anzeigestil „VFD“ (Vakuum-Fluoreszenz-Display) |
+| ![Songtext](docs/screenshots/device-lyrics.png) | ![Warteschlange](docs/screenshots/device-queue.png) |
+| Mitlaufender Songtext (Tipp auf eine Zeile springt dorthin) | Warteschlange im Seitenpanel |
+| ![Bibliothek](docs/screenshots/device-library.png) | ![Live-Filter](docs/screenshots/device-filter.png) |
+| Bibliothek mit Albenliste | Live-Filter mit Bildschirmtastatur |
+| ![Zonen & Ausgänge](docs/screenshots/device-zones.png) | ![Einstellungen](docs/screenshots/device-settings.png) |
+| Zonen & Ausgänge | Volumio-Einstellungen, Bibliothek, Neustart |
+| ![Ruhebildschirm](docs/screenshots/device-idle.png) | |
+| Ruhebildschirm | |
 
 <table>
   <tr>
@@ -41,7 +50,12 @@ Auflösung 1480×320 erzeugt, im eingebauten Demo-Modus (erzeugte Cover, keine e
   Wiederholen (aus → alle → einer), Lautstärke
 - **Band-Analyzer** – 64 Frequenzbänder (35 Hz–16 kHz) des echten Audiosignals hinter dem
   Positionsregler, für **jede Quelle**: Bibliothek, Webradio, AirPlay, Spotify, Bluetooth … Der
-  gespielte Teil leuchtet in der Akzentfarbe
+  gespielte Teil leuchtet in der Akzentfarbe; als VFD-Leuchtsegmente oder normale Balken
+- **Songtext und Infos** – zwei Knöpfe links in der Bedienleiste öffnen den mitlaufenden Songtext
+  (LRCLIB; Tipp auf eine Zeile springt dorthin) und Wikipedia-Infos zu Titel, Album und Künstler.
+  Auf Wunsch läuft die aktuelle Zeile über dem Positionsregler, über dem Analyzer
+- **Anzeigestil „VFD“** – alles leuchtet türkisgrün auf Schwarz wie bei einem
+  Vakuum-Fluoreszenz-Display, mit feinem Gitter, Segment-Analyzer und Cover als Punktraster
 - **Gesten** – Cover nach links/rechts wischen für nächsten/vorherigen Titel; langes Drücken
   (oder ⋮) auf einen Eintrag öffnet das Aktionsmenü direkt neben dem Finger
 - **Warteschlange, Bibliothek und Suche** in einem einklappbaren Seitenpanel (nur Symbole,
@@ -54,7 +68,8 @@ Auflösung 1480×320 erzeugt, im eingebauten Demo-Modus (erzeugte Cover, keine e
 - **Volumio-Einstellungen** hinter dem Zahnrad – Quellen, Wiedergabe, Erscheinungsbild, Netzwerk,
   System, Plugins, Bibliothek aktualisieren/neu einlesen, Neustart und Herunterfahren. Volumios
   eigene Seiten werden eingebettet
-- **Akzentfarbe** aus dem Albumcover; unscharfer Cover-Hintergrund
+- **Akzentfarbe** aus dem Albumcover – tönt auch Seitenpanel und Einstellungsseite; unscharfer
+  Cover-Hintergrund
 - **Erreichbar unter `http://volumio.local`** – Volumios eigene Oberfläche bleibt unter
   `http://volumio.local:3000`
 - **Ruhebildschirm** mit gedimmter, mittiger Uhr, wenn nichts läuft
@@ -101,20 +116,20 @@ Für Updates die neuen Dateien kopieren und auf dem Gerät `volumio plugin updat
 | Akzentfarbe | aus dem Cover | oder eine feste Farbe |
 | Feste Farbe / Ersatzfarbe | `#3ddc97` | auch, wenn sich aus dem Cover keine Farbe ermitteln lässt |
 | Hintergrund | unscharfes Cover | „Schlicht dunkel“ schont schwache Hardware |
+| Anzeigestil | Standard | „VFD“ sieht aus wie ein Vakuum-Fluoreszenz-Display: türkis leuchtend auf Schwarz, Segment-Analyzer, einfarbiges Cover |
 | Laufschrift | an | lange Titel laufen durch statt abgeschnitten zu werden |
 | 24-Stunden-Uhr | an | |
 | Beschriftung der Menüsymbole | aus | Namen unter den Panel-Symbolen |
 | Menüleiste ausgeklappt | aus | Warteschlange, Bibliothek und Suche beim Start ausgeklappt statt nur der Symbolleiste |
-| Stil des Panels | Transparent | oder „Liquid Glass“ mit Glanz und Lichtkante |
 | Deckkraft Panel | 40 % | 0 = ganz durchsichtig, 100 = deckend |
+| Songtext im Player | aus | aktuelle Zeile über dem Positionsregler; auch per Umschalter in der Bedienleiste |
 | Band-Analyzer | an | wirkt ab dem nächsten Start der Wiedergabe |
-| Analyzer-Verzögerung Bibliothek & Webradio | 0 ms | nur nötig, falls die Balken dem Ton vorauslaufen |
-| Analyzer-Verzögerung AirPlay, Spotify & Co. | 0 ms | eigener Wert für Quellen außerhalb von MPD |
+| Analyzer-Stil | VFD (Segmente) | oder normale Balken oder wie der Anzeigestil |
 | Eingebaute Bildschirmtastatur | an | nur auf Touch-Geräten |
 | Mauszeiger ausblenden | an | nur im Kiosk |
 | Ruhebildschirm nach | 300 s | 0 = aus |
 
-Änderungen am Aussehen übernimmt das Display innerhalb von 20 Sekunden ohne Neustart.
+Änderungen am Aussehen übernehmen alle Anzeigen sofort, ohne Neustart.
 
 ## Funktionsweise
 

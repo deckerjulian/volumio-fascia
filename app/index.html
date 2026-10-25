@@ -37,6 +37,7 @@
       <div id="seek-wrap">
         <div id="seek" class="slider" role="slider" aria-label="Position">
           <canvas id="spectrum" aria-hidden="true"></canvas>
+          <div id="lyric-inline" aria-hidden="true"><span></span></div>
           <div class="track"><div class="bar"><div class="fill"></div></div><div class="thumb-pos"><div class="thumb"></div></div></div>
         </div>
         <div id="times"><span id="elapsed">0:00</span><span id="live" data-i18n="live">LIVE</span><span id="duration">0:00</span></div>
@@ -56,6 +57,12 @@
           <div class="track"><div class="bar"><div class="fill"></div></div><div class="thumb-pos"><div class="thumb"></div></div></div>
         </div>
         <span id="volume-value">0</span>
+      </div>
+
+      <div id="extras">
+        <button id="btn-lyrics" class="tbtn side" data-icon="lyrics" data-i18n-label="lyrics"></button>
+        <button id="btn-info" class="tbtn side" data-icon="info" data-i18n-label="songInfo"></button>
+        <button id="btn-lyrics-inline" class="tbtn side" data-icon="subtitles" aria-pressed="false" data-i18n-label="lyricsInline"></button>
       </div>
     </section>
 
@@ -125,6 +132,16 @@
     </div>
     <div id="system-menu" class="list"><div class="tiles" id="system-tiles"></div></div>
     <div id="system-page"><iframe id="system-frame" title="Volumio"></iframe></div>
+  </div>
+
+  <div id="songinfo" class="overlay" data-view="lyrics">
+    <div id="si-bar">
+      <button class="tbtn sysbtn si-tab" data-view="lyrics"><span data-icon="lyrics"></span><b data-i18n="lyrics"></b></button>
+      <button class="tbtn sysbtn si-tab" data-view="info"><span data-icon="info"></span><b data-i18n="songInfo"></b></button>
+      <button id="si-close" class="tbtn sysbtn"><span data-icon="close"></span><b data-i18n="player"></b></button>
+    </div>
+    <div id="si-lyrics" class="si-view list"></div>
+    <div id="si-info" class="si-view list"></div>
   </div>
 
   <div id="zones" class="overlay">

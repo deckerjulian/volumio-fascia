@@ -4,8 +4,10 @@
 //   npm run dev                         -> http://localhost:4005/?demo  (ohne Volumio)
 //   VOLUMIO=volumio.local npm run dev   -> http://localhost:4005/?volumio=http://volumio.local:3000
 
+var os = require('os');
 var path = require('path');
 var createServer = require('../lib/server');
+var createSongInfo = require('../lib/songinfo');
 var defaults = require('../config.json');
 
 var settings = { language: process.env.LANG_CODE || 'de' };
@@ -16,7 +18,11 @@ var server = createServer({
   root: path.join(__dirname, '..', 'app'),
   volumioHost: process.env.VOLUMIO || 'localhost',
   volumioPort: 3000,
-  getSettings: function () { return settings; }
+  getSettings: function () { return settings; },
+  onSettings: function (patch) {
+    if ('lyricsInline' in patch) settings.lyricsInline = !!patch.lyricsInline;
+  },
+  songInfo: createSongInfo({ cacheDir: path.join(os.tmpdir(), 'touchbar-songinfo') })
 });
 
 server.start(port).then(function (p) {
