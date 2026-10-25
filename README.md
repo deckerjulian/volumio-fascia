@@ -106,10 +106,13 @@ To update later, copy the new files and run `volumio plugin update` on the devic
 
 ### Upgrading from “Touch Bar Theme”
 
-Fascia is the new name of the Touch Bar Theme (plugin ID `touch_bar_theme` → `fascia`). Disable and
-uninstall *Touch Bar Theme* under *Plugins → Installed plugins*, then install Fascia as above.
-Fascia takes over its settings and removes what is left of it (kiosk URL, port 80 redirect, ALSA
-contribution).
+Fascia is the new name of the Touch Bar Theme (plugin ID `touch_bar_theme` → `fascia`).
+
+1. *Plugins → Installed plugins*: **disable** *Touch Bar Theme* (don’t uninstall it yet – Volumio
+   deletes a plugin’s settings when uninstalling).
+2. Install and enable Fascia as above. It takes over the Touch Bar Theme’s settings and removes
+   what is left of it (kiosk URL, port 80 redirect, ALSA contribution).
+3. Now uninstall *Touch Bar Theme*.
 
 ## Settings
 
