@@ -22,11 +22,11 @@ var server = createServer({
   onSettings: function (patch) {
     if ('lyricsInline' in patch) settings.lyricsInline = !!patch.lyricsInline;
   },
-  songInfo: createSongInfo({ cacheDir: path.join(os.tmpdir(), 'touchbar-songinfo') })
+  songInfo: createSongInfo({ cacheDir: path.join(os.tmpdir(), 'fascia-songinfo') })
 });
 
 server.start(port).then(function (p) {
-  console.log('Touch Bar Theme: http://localhost:' + p + '/?demo');
+  console.log('Fascia: http://localhost:' + p + '/?demo');
   if (process.env.VOLUMIO) {
     console.log('Mit Volumio:     http://localhost:' + p + '/?volumio=http://' + process.env.VOLUMIO + ':3000');
   }

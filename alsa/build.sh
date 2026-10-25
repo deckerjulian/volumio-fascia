@@ -1,6 +1,6 @@
 #!/bin/bash
 # Baut den ALSA-Scope für alle Volumio-Architekturen in Docker (Debian Bookworm, passend zu Volumio 4).
-# Ergebnis: alsa/lib/<node-arch>/libtouchbar_scope.so  (arm = armhf, arm64, x64 = amd64)
+# Ergebnis: alsa/lib/<node-arch>/libfascia_scope.so  (arm = armhf, arm64, x64 = amd64)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -11,8 +11,8 @@ build() {
   docker run --rm --platform "$platform" -v "$PWD:/src" -w /src debian:bookworm bash -c "
     apt-get update -qq >/dev/null &&
     apt-get install -y -qq --no-install-recommends gcc libc6-dev libasound2-dev >/dev/null &&
-    gcc -shared -fPIC -DPIC -O2 -Wall -Wextra $flags -o lib/$arch/libtouchbar_scope.so touchbar_scope.c -lasound &&
-    strip lib/$arch/libtouchbar_scope.so"
+    gcc -shared -fPIC -DPIC -O2 -Wall -Wextra $flags -o lib/$arch/libfascia_scope.so fascia_scope.c -lasound &&
+    strip lib/$arch/libfascia_scope.so"
 }
 
 # Raspberry Pi (32 Bit, auch Pi Zero/1: ARMv6 mit VFP)

@@ -1,6 +1,7 @@
-# Touch Bar Theme for Volumio
+# Fascia
 
-A touch-first user interface for **Volumio 3/4** on narrow bar displays such as **320×1480**
+**Fascia** – named after the front panel of hi-fi components, where the glowing displays used to
+sit – is a touch-first user interface for **Volumio 3/4** on narrow bar displays such as **320×1480**
 panels — in landscape (1480×320) and portrait (320×1480). It also scales to similar bar displays
 (e.g. 400×1280), works on computers and tablets, and ships with a real-time **band analyzer** that
 works for every audio source.
@@ -87,21 +88,28 @@ LRCLIB.</sub>
 1. Enable SSH on the Volumio device (`http://volumio.local:3000/dev` → SSH).
 2. Copy the plugin to the device, including `node_modules`:
    ```sh
-   git clone https://github.com/deckerjulian/volumio-touch-bar-theme.git
-   cd volumio-touch-bar-theme
+   git clone https://github.com/deckerjulian/volumio-fascia.git
+   cd volumio-fascia
    npm install --omit=dev
-   scp -r . volumio@volumio.local:/home/volumio/touch_bar_theme
+   scp -r . volumio@volumio.local:/home/volumio/fascia
    ```
 3. Install it on the device:
    ```sh
    ssh volumio@volumio.local
-   cd ~/touch_bar_theme
+   cd ~/fascia
    volumio plugin install
    ```
-4. Enable **Touch Bar Theme** under *Plugins → Installed plugins*. The display switches to the
-   theme automatically.
+4. Enable **Fascia** under *Plugins → Installed plugins*. The display switches to it
+   automatically.
 
 To update later, copy the new files and run `volumio plugin update` on the device.
+
+### Upgrading from “Touch Bar Theme”
+
+Fascia is the new name of the Touch Bar Theme (plugin ID `touch_bar_theme` → `fascia`). Disable and
+uninstall *Touch Bar Theme* under *Plugins → Installed plugins*, then install Fascia as above.
+Fascia takes over its settings and removes what is left of it (kiosk URL, port 80 redirect, ALSA
+contribution).
 
 ## Settings
 
@@ -137,7 +145,7 @@ Appearance changes reach every display immediately, without a restart.
 | `lib/kiosk.js` | Points the Touch Display kiosk at the theme and restores it |
 | `lib/port80.js` | systemd drop-in that redirects port 80 to the theme |
 | `lib/spectrum.js`, `lib/spectrum-worker.js` | Reads the analyzer FIFO, FFT, Server-Sent Events |
-| `alsa/touchbar_scope.c`, `alsa/lib/*` | ALSA `meter` scope and prebuilt libraries |
+| `alsa/fascia_scope.c`, `alsa/lib/*` | ALSA `meter` scope and prebuilt libraries |
 | `app/` | The UI (plain HTML/CSS/JS), talks to Volumio over Socket.IO |
 | `app/demo.js` | Simulated Volumio for the demo mode |
 
@@ -146,10 +154,10 @@ Appearance changes reach every display immediately, without a restart.
 All of them are reverted when the plugin is disabled or uninstalled.
 
 - **Kiosk**: replaces `http://localhost:3000` in `/opt/volumiokiosk.sh` with the theme URL.
-- **Port 80**: adds `/etc/systemd/system/iptables.service.d/touchbar.conf` so Volumio’s existing
+- **Port 80**: adds `/etc/systemd/system/iptables.service.d/fascia.conf` so Volumio’s existing
   port-80 redirect points to the theme instead of port 3000.
 - **Analyzer**: registers an ALSA contribution through Volumio’s official mechanism
-  (`has_alsa_contribution`), giving the chain `volumio → touchbar_meter → volumioOutput`.
+  (`has_alsa_contribution`), giving the chain `volumio → fascia_meter → volumioOutput`.
   ALSA’s `meter` plugin passes the audio through unchanged; the scope copies it into a FIFO and
   drops data instead of ever blocking playback. Before activation the library is load-tested in an
   isolated chain that plays into `null`; if that fails, the audio chain is left untouched. Because
@@ -174,7 +182,7 @@ Set the browser’s device emulation to 1480×320 or 320×1480. URL parameters: 
   `systemctl restart volumio`: GPIO plugins such as *Rotary Encoder II* don’t clean up their
   device-tree overlays in that case. Reboot the Pi (or disable and re-enable that plugin).
 - **The theme doesn’t open at `https://volumio.local`**: Volumio has no HTTPS; use `http://`.
-- **No analyzer bars**: check the plugin log (`journalctl -u volumio | grep touch_bar`). If the
+- **No analyzer bars**: check the plugin log (`journalctl -u volumio | grep fascia`). If the
   load test failed, the analyzer stays off and playback is unaffected.
 
 ## License

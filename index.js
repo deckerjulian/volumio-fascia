@@ -12,15 +12,18 @@ var kiosk = require('./lib/kiosk');
 var port80 = require('./lib/port80');
 
 var MPD_CONF = '/etc/mpd.conf';
-var ANALYZER_FIFO = '/tmp/touchbar_alsa.fifo';
-var ANALYZER_RATE = '/tmp/touchbar_alsa.rate';
-var ALSA_CONTRIBUTION = 'touchbar_meter.touchbar_out.conf';
+var ANALYZER_FIFO = '/tmp/fascia_alsa.fifo';
+var ANALYZER_RATE = '/tmp/fascia_alsa.rate';
+var ALSA_CONTRIBUTION = 'fascia_meter.fascia_out.conf';
 // Frühere Versionen nutzten einen FIFO-Ausgang in MPD; der wird nur noch aufgeräumt
 var OLD_MPD_OUTPUT = 'touchbar_analyzer';
+// Bis Version 1.x hieß das Plugin "Touch Bar Theme" (ID touch_bar_theme)
+var LEGACY_NAME = 'touch_bar_theme';
+var LEGACY_ALSA_CONTRIBUTION = 'touchbar_meter.touchbar_out.conf';
 
-module.exports = TouchBarTheme;
+module.exports = Fascia;
 
-function TouchBarTheme(context) {
+function Fascia(context) {
   this.context = context;
   this.commandRouter = this.context.coreCommand;
   this.logger = this.context.logger;
@@ -55,8 +58,9 @@ function selectValue(v) {
 // ---------------------------------------------------------------------------
 // Lebenszyklus
 
-TouchBarTheme.prototype.onVolumioStart = function () {
+Fascia.prototype.onVolumioStart = function () {
   var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+  this.migrateLegacy(configFile);
   this.config = new (require('v-conf'))();
   this.config.loadFile(configFile);
   // Bei einem Update bleibt die gespeicherte Konfiguration erhalten; neue Einstellungen ergänzen
@@ -67,11 +71,29 @@ TouchBarTheme.prototype.onVolumioStart = function () {
   return libQ.resolve();
 };
 
-TouchBarTheme.prototype.getConfigurationFiles = function () {
+// Umstieg vom "Touch Bar Theme": dessen Einstellungen übernehmen und seinen ALSA-Baustein entfernen,
+// damit nicht zwei Analyzer-Scopes in der Kette hängen. Kiosk und Port 80 räumen lib/kiosk.js und
+// lib/port80.js auf.
+Fascia.prototype.migrateLegacy = function (configFile) {
+  var legacyDir = path.join(path.dirname(path.dirname(configFile)), LEGACY_NAME);
+  try {
+    if (!fs.existsSync(configFile) && fs.existsSync(path.join(legacyDir, 'config.json'))) {
+      fs.mkdirSync(path.dirname(configFile), { recursive: true });
+      fs.copyFileSync(path.join(legacyDir, 'config.json'), configFile);
+      this.logger.info('[fascia] settings taken over from ' + LEGACY_NAME);
+    }
+    var legacyAlsa = path.join(legacyDir, 'asound', LEGACY_ALSA_CONTRIBUTION);
+    if (fs.existsSync(legacyAlsa)) fs.unlinkSync(legacyAlsa);
+  } catch (err) {
+    this.logger.error('[fascia] taking over ' + LEGACY_NAME + ' failed: ' + err.message);
+  }
+};
+
+Fascia.prototype.getConfigurationFiles = function () {
   return ['config.json'];
 };
 
-TouchBarTheme.prototype.onStart = function () {
+Fascia.prototype.onStart = function () {
   var self = this;
   self.loadI18n();
   return kewify(self.startServer()
@@ -86,29 +108,29 @@ TouchBarTheme.prototype.onStart = function () {
       return self.syncAnalyzer();
     })
     .catch(function (err) {
-      self.logger.error('[touch_bar_theme] start failed: ' + err.message);
+      self.logger.error('[fascia] start failed: ' + err.message);
       self.toast('error', self.str('SERVER_ERROR'), err.message);
       throw err;
     }));
 };
 
-TouchBarTheme.prototype.onStop = function () {
+Fascia.prototype.onStop = function () {
   var self = this;
   self.cleanupMpdOutput();
   // ALSA-Baustein entfernen, bevor das Plugin (und damit die Bibliothek) verschwindet
   var analyzerOff = self.removeAlsaContribution().catch(function (err) {
-    self.logger.error('[touch_bar_theme] removing ALSA contribution failed: ' + err.message);
+    self.logger.error('[fascia] removing ALSA contribution failed: ' + err.message);
   });
   var chain = self.config.get('kiosk') ? kiosk.reset().catch(function (err) {
-    self.logger.error('[touch_bar_theme] kiosk reset failed: ' + err.message);
+    self.logger.error('[fascia] kiosk reset failed: ' + err.message);
   }) : Promise.resolve();
   var web = port80.reset(self.config.get('port')).catch(function (err) {
-    self.logger.error('[touch_bar_theme] port 80 reset failed: ' + err.message);
+    self.logger.error('[fascia] port 80 reset failed: ' + err.message);
   });
   return kewify(Promise.all([analyzerOff, chain, web]).then(function () { return self.stopServer(); }));
 };
 
-TouchBarTheme.prototype.onRestart = function () {
+Fascia.prototype.onRestart = function () {
   var self = this;
   return kewify(self.stopServer().then(function () { return self.startServer(); }));
 };
@@ -116,7 +138,7 @@ TouchBarTheme.prototype.onRestart = function () {
 // ---------------------------------------------------------------------------
 // Webserver
 
-TouchBarTheme.prototype.startServer = function () {
+Fascia.prototype.startServer = function () {
   var self = this;
   self.spectrum = createSpectrumHub({ fifo: ANALYZER_FIFO, rateFile: ANALYZER_RATE, logger: self.logger });
   self.server = createServer({
@@ -142,11 +164,11 @@ TouchBarTheme.prototype.startServer = function () {
   });
   var port = self.config.get('port');
   return self.server.start(port).then(function () {
-    self.logger.info('[touch_bar_theme] UI available at ' + self.getPublicUrl());
+    self.logger.info('[fascia] UI available at ' + self.getPublicUrl());
   });
 };
 
-TouchBarTheme.prototype.stopServer = function () {
+Fascia.prototype.stopServer = function () {
   if (this.spectrum) this.spectrum.stop();
   this.spectrum = null;
   var s = this.server;
@@ -154,7 +176,7 @@ TouchBarTheme.prototype.stopServer = function () {
   return s ? s.stop() : Promise.resolve();
 };
 
-TouchBarTheme.prototype.getThemeSettings = function () {
+Fascia.prototype.getThemeSettings = function () {
   var c = this.config;
   return {
     language: this.commandRouter.sharedVars.get('language_code') || 'en',
@@ -178,15 +200,15 @@ TouchBarTheme.prototype.getThemeSettings = function () {
 
 // Geänderte Einstellungen sofort an alle Anzeigen (Kiosk, Handy, iOS-App) schicken, über deren
 // Verbindung zu Volumio. Sonst holen sie sie erst beim nächsten Abfragen (alle 20 s).
-TouchBarTheme.prototype.pushSettings = function () {
+Fascia.prototype.pushSettings = function () {
   try {
-    this.commandRouter.broadcastMessage('pushTouchBarSettings', this.getThemeSettings());
+    this.commandRouter.broadcastMessage('pushFasciaSettings', this.getThemeSettings());
   } catch (err) {
-    this.logger.error('[touch_bar_theme] pushSettings: ' + err.message);
+    this.logger.error('[fascia] pushSettings: ' + err.message);
   }
 };
 
-TouchBarTheme.prototype.getPublicUrl = function () {
+Fascia.prototype.getPublicUrl = function () {
   var ip = 'volumio.local';
   var ifaces = os.networkInterfaces();
   Object.keys(ifaces).some(function (name) {
@@ -204,50 +226,50 @@ TouchBarTheme.prototype.getPublicUrl = function () {
 // ---------------------------------------------------------------------------
 // Kiosk
 
-TouchBarTheme.prototype.applyKiosk = function (notify) {
+Fascia.prototype.applyKiosk = function (notify) {
   var self = this;
   return kiosk.apply(self.config.get('port')).then(function (result) {
     if (!notify) return;
     if (result === 'missing') self.toast('warning', self.str('PAGE_TITLE'), self.str('KIOSK_MISSING'));
     else self.toast('success', self.str('PAGE_TITLE'), self.str('KIOSK_APPLIED'));
   }).catch(function (err) {
-    self.logger.error('[touch_bar_theme] kiosk apply failed: ' + err.message);
+    self.logger.error('[fascia] kiosk apply failed: ' + err.message);
     if (notify) self.toast('error', self.str('PAGE_TITLE'), err.message);
   });
 };
 
-TouchBarTheme.prototype.resetKiosk = function (notify) {
+Fascia.prototype.resetKiosk = function (notify) {
   var self = this;
   return kiosk.reset().then(function (result) {
     if (notify && result === 'changed') self.toast('success', self.str('PAGE_TITLE'), self.str('KIOSK_RESTORED'));
   }).catch(function (err) {
-    self.logger.error('[touch_bar_theme] kiosk reset failed: ' + err.message);
+    self.logger.error('[fascia] kiosk reset failed: ' + err.message);
     if (notify) self.toast('error', self.str('PAGE_TITLE'), err.message);
   });
 };
 
-TouchBarTheme.prototype.applyPort80 = function (notify) {
+Fascia.prototype.applyPort80 = function (notify) {
   var self = this;
   return port80.apply(self.config.get('port')).then(function () {
     if (notify) self.toast('success', self.str('PAGE_TITLE'), self.str('PORT80_APPLIED'));
   }).catch(function (err) {
-    self.logger.error('[touch_bar_theme] port 80 redirect failed: ' + err.message);
+    self.logger.error('[fascia] port 80 redirect failed: ' + err.message);
     if (notify) self.toast('error', self.str('PAGE_TITLE'), err.message);
   });
 };
 
-TouchBarTheme.prototype.restartKiosk = function () {
+Fascia.prototype.restartKiosk = function () {
   var self = this;
   self.toast('info', self.str('PAGE_TITLE'), self.str('KIOSK_RESTARTED'));
   return kewify(kiosk.restart().catch(function (err) {
-    self.logger.error('[touch_bar_theme] kiosk restart failed: ' + err.message);
+    self.logger.error('[fascia] kiosk restart failed: ' + err.message);
   }));
 };
 
 // ---------------------------------------------------------------------------
 // Einstellungen
 
-TouchBarTheme.prototype.getUIConfig = function () {
+Fascia.prototype.getUIConfig = function () {
   var self = this;
   var defer = libQ.defer();
   var langCode = self.commandRouter.sharedVars.get('language_code');
@@ -285,14 +307,14 @@ TouchBarTheme.prototype.getUIConfig = function () {
 
     defer.resolve(uiconf);
   }).fail(function (err) {
-    self.logger.error('[touch_bar_theme] getUIConfig failed: ' + err);
+    self.logger.error('[fascia] getUIConfig failed: ' + err);
     defer.reject(new Error());
   });
 
   return defer.promise;
 };
 
-TouchBarTheme.prototype.saveDisplay = function (data) {
+Fascia.prototype.saveDisplay = function (data) {
   var self = this;
   var oldPort = self.config.get('port');
   var port = parseInt(data.port, 10);
@@ -321,13 +343,13 @@ TouchBarTheme.prototype.saveDisplay = function (data) {
       });
     }
   }).catch(function (err) {
-    self.logger.error('[touch_bar_theme] saveDisplay failed: ' + err.message);
+    self.logger.error('[fascia] saveDisplay failed: ' + err.message);
     self.toast('error', self.str('SERVER_ERROR'), err.message);
   });
   return kewify(chain);
 };
 
-TouchBarTheme.prototype.saveAppearance = function (data) {
+Fascia.prototype.saveAppearance = function (data) {
   var accentMode = selectValue(data.accentMode) === 'fixed' ? 'fixed' : 'cover';
   var background = selectValue(data.background) === 'solid' ? 'solid' : 'blur';
   var color = String(data.accentColor || '').trim();
@@ -356,7 +378,7 @@ TouchBarTheme.prototype.saveAppearance = function (data) {
   return analyzerChanged ? kewify(this.syncAnalyzer()) : libQ.resolve();
 };
 
-TouchBarTheme.prototype.saveBehaviour = function (data) {
+Fascia.prototype.saveBehaviour = function (data) {
   var idle = parseInt(data.idleTimeout, 10);
   if (!(idle >= 0)) idle = 0;
   this.config.set('keyboard', !!data.keyboard);
@@ -370,7 +392,7 @@ TouchBarTheme.prototype.saveBehaviour = function (data) {
 // ---------------------------------------------------------------------------
 // Hilfen
 
-TouchBarTheme.prototype.loadI18n = function () {
+Fascia.prototype.loadI18n = function () {
   var lang = this.commandRouter.sharedVars.get('language_code');
   this.i18nDefaults = require(path.join(__dirname, 'i18n', 'strings_en.json'));
   try {
@@ -380,12 +402,12 @@ TouchBarTheme.prototype.loadI18n = function () {
   }
 };
 
-TouchBarTheme.prototype.str = function (key) {
+Fascia.prototype.str = function (key) {
   if (!this.i18n) this.loadI18n();
   return this.i18n[key] || this.i18nDefaults[key] || key;
 };
 
-TouchBarTheme.prototype.toast = function (type, title, message) {
+Fascia.prototype.toast = function (type, title, message) {
   this.commandRouter.pushToastMessage(type, title, message);
 };
 
@@ -394,34 +416,34 @@ TouchBarTheme.prototype.toast = function (type, title, message) {
 //
 // Volumio baut /etc/asound.conf aus Bausteinen der Plugins zusammen (package.json:
 // has_alsa_contribution, Dateien <ein>.<aus>.conf). Unser Baustein ist ein ALSA-"meter", der den
-// Ton unverändert weiterreicht und über alsa/lib/<arch>/libtouchbar_scope.so eine Kopie in einen
+// Ton unverändert weiterreicht und über alsa/lib/<arch>/libfascia_scope.so eine Kopie in einen
 // FIFO schreibt. So sehen wir alle Quellen (MPD, AirPlay, Spotify, Bluetooth …). Der Scope
 // blockiert nie: ohne Leser oder bei vollem FIFO werden die Daten verworfen.
 
-TouchBarTheme.prototype.scopeLibrary = function () {
-  var lib = path.join(__dirname, 'alsa', 'lib', process.arch, 'libtouchbar_scope.so');
+Fascia.prototype.scopeLibrary = function () {
+  var lib = path.join(__dirname, 'alsa', 'lib', process.arch, 'libfascia_scope.so');
   return fs.existsSync(lib) ? lib : null;
 };
 
-TouchBarTheme.prototype.alsaContributionDir = function () {
+Fascia.prototype.alsaContributionDir = function () {
   return this.commandRouter.pluginManager.getConfigurationFile(this.context, 'asound');
 };
 
 function alsaSnippet(lib, slave, fifo, rate) {
   return [
-    'pcm.touchbar_meter {',
+    'pcm.fascia_meter {',
     '    type meter',
     '    slave.pcm "' + slave + '"',
-    '    scopes.0 touchbar_scope',
+    '    scopes.0 fascia_scope',
     '}',
     '',
-    'pcm_scope.touchbar_scope {',
-    '    type touchbar',
+    'pcm_scope.fascia_scope {',
+    '    type fascia',
     '    fifo "' + fifo + '"',
     '    ratefile "' + rate + '"',
     '}',
     '',
-    'pcm_scope_type.touchbar {',
+    'pcm_scope_type.fascia {',
     '    lib "' + lib + '"',
     '}',
     ''
@@ -430,13 +452,13 @@ function alsaSnippet(lib, slave, fifo, rate) {
 
 // Lädt die Bibliothek einmal in einer abgeschotteten Testkette (Ausgabe ins Leere), bevor sie in
 // die echte Kette kommt. Lädt sie nicht, bliebe sonst jede Quelle stumm.
-TouchBarTheme.prototype.testScope = function (lib) {
-  var dir = fs.mkdtempSync(path.join(os.tmpdir(), 'touchbar-'));
+Fascia.prototype.testScope = function (lib) {
+  var dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fascia-'));
   var conf = path.join(dir, 'test.conf');
   fs.writeFileSync(conf, alsaSnippet(lib, 'null', path.join(dir, 'fifo'), path.join(dir, 'rate'))
-    .replace('pcm.touchbar_meter', 'pcm.touchbar_test'));
+    .replace('pcm.fascia_meter', 'pcm.fascia_test'));
   return new Promise(function (resolve) {
-    execFile('aplay', ['-q', '-D', 'touchbar_test', '-f', 'S16_LE', '-r', '44100', '-c', '2', '-d', '1', '/dev/zero'], {
+    execFile('aplay', ['-q', '-D', 'fascia_test', '-f', 'S16_LE', '-r', '44100', '-c', '2', '-d', '1', '/dev/zero'], {
       timeout: 10000,
       env: Object.assign({}, process.env, { ALSA_CONFIG_PATH: '/usr/share/alsa/alsa.conf:' + conf })
     }, function (err, stdout, stderr) {
@@ -446,13 +468,13 @@ TouchBarTheme.prototype.testScope = function (lib) {
   });
 };
 
-TouchBarTheme.prototype.updateAlsaConfig = function () {
+Fascia.prototype.updateAlsaConfig = function () {
   var self = this;
   return new Promise(function (resolve) {
     var p = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateALSAConfigFile');
     if (p && typeof p.then === 'function') {
       p.then(function () { resolve(); }, function (err) {
-        self.logger.error('[touch_bar_theme] updateALSAConfigFile failed: ' + err);
+        self.logger.error('[fascia] updateALSAConfigFile failed: ' + err);
         resolve();
       });
     } else {
@@ -461,7 +483,7 @@ TouchBarTheme.prototype.updateAlsaConfig = function () {
   });
 };
 
-TouchBarTheme.prototype.removeAlsaContribution = function () {
+Fascia.prototype.removeAlsaContribution = function () {
   var file = path.join(this.alsaContributionDir(), ALSA_CONTRIBUTION);
   if (!fs.existsSync(file)) return Promise.resolve();
   fs.unlinkSync(file);
@@ -470,7 +492,7 @@ TouchBarTheme.prototype.removeAlsaContribution = function () {
 
 // Bringt den ALSA-Baustein in Einklang mit dem Schalter. Wirkt ab dem nächsten Öffnen des
 // Audiogeräts (nächster Start der Wiedergabe); laufende Wiedergabe wird nicht unterbrochen.
-TouchBarTheme.prototype.syncAnalyzer = function () {
+Fascia.prototype.syncAnalyzer = function () {
   var self = this;
   var dir = self.alsaContributionDir();
   var file = path.join(dir, ALSA_CONTRIBUTION);
@@ -479,48 +501,48 @@ TouchBarTheme.prototype.syncAnalyzer = function () {
 
   var lib = self.scopeLibrary();
   if (!lib) {
-    self.logger.error('[touch_bar_theme] no analyzer library for architecture ' + process.arch);
+    self.logger.error('[fascia] no analyzer library for architecture ' + process.arch);
     return self.removeAlsaContribution();
   }
   return self.testScope(lib).then(function (error) {
     if (error) {
-      self.logger.error('[touch_bar_theme] analyzer library test failed, not activating: ' + error);
+      self.logger.error('[fascia] analyzer library test failed, not activating: ' + error);
       self.toast('error', self.str('PAGE_TITLE'), self.str('ANALYZER_FAILED'));
       return self.removeAlsaContribution();
     }
-    var snippet = alsaSnippet(lib, 'touchbar_out', ANALYZER_FIFO, ANALYZER_RATE);
+    var snippet = alsaSnippet(lib, 'fascia_out', ANALYZER_FIFO, ANALYZER_RATE);
     var current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
     if (current === snippet) return;
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(file, snippet);
     return self.updateAlsaConfig();
   }).catch(function (err) {
-    self.logger.error('[touch_bar_theme] analyzer setup failed: ' + err.message);
+    self.logger.error('[fascia] analyzer setup failed: ' + err.message);
   });
 };
 
 // Aufräumen der früheren MPD-Variante: Rückruf abmelden (sonst schreibt Volumio nach dem
 // Entladen "undefined" in die mpd.conf) und den Ausgang aus der mpd.conf entfernen. MPD muss
 // dafür nicht neu starten; ein ungelesener FIFO-Ausgang stört die Wiedergabe nicht.
-TouchBarTheme.prototype.cleanupMpdOutput = function () {
+Fascia.prototype.cleanupMpdOutput = function () {
   var self = this;
   var mpd = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
   if (mpd && Array.isArray(mpd.registeredCallbacks)) {
     var list = mpd.registeredCallbacks;
     for (var i = list.length - 1; i >= 0; i--) {
-      if (list[i] && list[i].plugin === 'touch_bar_theme') list.splice(i, 1);
+      if (list[i] && (list[i].plugin === 'fascia' || list[i].plugin === LEGACY_NAME)) list.splice(i, 1);
     }
   }
   var hasOld = false;
   try { hasOld = fs.readFileSync(MPD_CONF, 'utf8').indexOf(OLD_MPD_OUTPUT) !== -1; } catch (e) { /* egal */ }
   if (hasOld) {
     self.commandRouter.executeOnPlugin('music_service', 'mpd', 'createMPDFile', function (err) {
-      if (err) self.logger.error('[touch_bar_theme] createMPDFile failed: ' + err);
+      if (err) self.logger.error('[fascia] createMPDFile failed: ' + err);
     });
   }
 };
 
 // Falls noch ein Rückruf der früheren Version registriert ist: immer einen String liefern
-TouchBarTheme.prototype.getMpdOutput = function () {
+Fascia.prototype.getMpdOutput = function () {
   return '';
 };

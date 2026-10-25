@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Installing Touch Bar Theme"
+echo "Installing Fascia"
 
 # Keine zusätzlichen Systempakete nötig: der Webserver nutzt nur Node-Bordmittel.
 

@@ -44,11 +44,15 @@ var original = [
 ].join('\n');
 
 var patched = kiosk.patch(original, 4005);
-assert.ok(patched.indexOf('http://localhost:4005/?kiosk=touchbar') !== -1, 'URL ersetzt');
+assert.ok(patched.indexOf('http://localhost:4005/?kiosk=fascia') !== -1, 'URL ersetzt');
 assert.ok(patched.indexOf('/dev/tcp/127.0.0.1/4005') !== -1, 'Warteschleife ersetzt');
 assert.ok(patched.indexOf('localhost:3000') === -1, 'keine alte URL mehr');
 assert.strictEqual(kiosk.patch(patched, 4005), patched, 'idempotent');
-assert.ok(kiosk.patch(patched, 4100).indexOf('http://localhost:4100/?kiosk=touchbar') !== -1, 'Portwechsel');
+assert.ok(kiosk.patch(patched, 4100).indexOf('http://localhost:4100/?kiosk=fascia') !== -1, 'Portwechsel');
+// Umstieg vom "Touch Bar Theme": dessen Kiosk-URL wird übernommen bzw. zurückgesetzt
+var legacy = original.replace('http://localhost:3000', 'http://localhost:4005/?kiosk=touchbar');
+assert.ok(kiosk.patch(legacy, 4005).indexOf('?kiosk=fascia') !== -1 && kiosk.patch(legacy, 4005).indexOf('touchbar') === -1, 'alte Marke ersetzt');
+assert.strictEqual(kiosk.restore(legacy).indexOf('http://localhost:3000') !== -1, true, 'alte Marke zurückgesetzt');
 assert.strictEqual(kiosk.restore(patched), original, 'Wiederherstellung');
 assert.strictEqual(kiosk.restore(original), original, 'fremde Skripte bleiben unberührt');
 var nowPlaying = original.replace('http://localhost:3000', 'http://localhost:4004');

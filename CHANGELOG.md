@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 – Fascia
 
+- New name: **Fascia** (plugin ID `fascia`, repository `volumio-fascia`). Replaces the “Touch Bar
+  Theme”: uninstall it first; Fascia takes over its settings and cleans up its kiosk URL, port 80
+  redirect and ALSA contribution
 - Lyrics and song info: two buttons at the left of the control bar open time-synced lyrics
   (LRCLIB; tap a line to jump there) and Wikipedia info on track, album and artist. Optionally
   the current line runs above the position slider, over the analyzer (setting and toggle in the

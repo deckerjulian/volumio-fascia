@@ -5,7 +5,7 @@
 
   var params = new URLSearchParams(location.search);
   var DEMO = params.has('demo');
-  var KIOSK = params.get('kiosk') === 'touchbar';
+  var KIOSK = params.get('kiosk') === 'fascia';
   var VOLUMIO = params.get('volumio') ||
     (location.protocol === 'file:' ? 'http://localhost:3000' : location.protocol + '//' + location.hostname + ':3000');
 
@@ -301,7 +301,7 @@
     socket.on('disconnect', function () { setOnline(false); });
     socket.on('pushState', onState);
     // Das Plugin schickt geänderte Einstellungen sofort an alle Anzeigen
-    socket.on('pushTouchBarSettings', applySettings);
+    socket.on('pushFasciaSettings', applySettings);
     socket.on('pushQueue', onQueue);
     socket.on('pushBrowseSources', onSources);
     socket.on('pushBrowseLibrary', onBrowse);
@@ -1174,7 +1174,7 @@
       renderSources();
     }
     activeTab = name;
-    storeSet('tb.tab', name);
+    storeSet('fascia.tab', name);
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
       b.classList.toggle('active', b.dataset.tab === name);
     });
@@ -1801,7 +1801,7 @@
     var items = menuItems.concat([
       { id: 'updateDb', name: t('updateLibrary'), icon: 'refresh' },
       { id: 'rescanDb', name: t('rescanLibrary'), icon: 'sync' },
-      { id: 'theme', name: 'Touch Bar Theme', path: '/plugin/user_interface-touch_bar_theme', icon: 'brush' },
+      { id: 'theme', name: 'Fascia', path: '/plugin/user_interface-fascia', icon: 'brush' },
       { id: 'reboot', name: t('reboot'), icon: 'restart' },
       { id: 'power', name: t('power'), icon: 'power', cls: 'danger' }
     ]);
@@ -2375,7 +2375,7 @@
   syncFilter();
   // Bis die Einstellungen da sind eingeklappt; applySettings setzt dann den gewählten Start-Zustand
   setPanelLevel(0);
-  var savedTab = storeGet('tb.tab');
+  var savedTab = storeGet('fascia.tab');
   switchTab(savedTab === 'browse' || savedTab === 'search' ? savedTab : 'queue');
   setOnline(false);
 

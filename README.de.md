@@ -1,6 +1,7 @@
-# Touch Bar Theme für Volumio
+# Fascia
 
-Eine Touch-Oberfläche für **Volumio 3/4** auf schmalen Bar-Displays wie **320×1480** – im
+**Fascia** – benannt nach der Frontblende von Hi-Fi-Geräten, in der früher die leuchtenden
+Anzeigen saßen – ist eine Touch-Oberfläche für **Volumio 3/4** auf schmalen Bar-Displays wie **320×1480** – im
 Querformat (1480×320) wie im Hochformat (320×1480). Sie passt sich auch an ähnliche Displays an
 (z. B. 400×1280), läuft am Computer und auf Tablets und bringt einen **Band-Analyzer** mit, der
 für jede Audioquelle funktioniert.
@@ -90,21 +91,28 @@ echten Bibliothek (Cover © der jeweiligen Rechteinhaber). Songtexte von LRCLIB.
 1. SSH auf dem Volumio-Gerät aktivieren (`http://volumio.local:3000/dev` → SSH).
 2. Das Plugin samt `node_modules` auf das Gerät kopieren:
    ```sh
-   git clone https://github.com/deckerjulian/volumio-touch-bar-theme.git
-   cd volumio-touch-bar-theme
+   git clone https://github.com/deckerjulian/volumio-fascia.git
+   cd volumio-fascia
    npm install --omit=dev
-   scp -r . volumio@volumio.local:/home/volumio/touch_bar_theme
+   scp -r . volumio@volumio.local:/home/volumio/fascia
    ```
 3. Auf dem Gerät installieren:
    ```sh
    ssh volumio@volumio.local
-   cd ~/touch_bar_theme
+   cd ~/fascia
    volumio plugin install
    ```
-4. Unter *Plugins → Installierte Plugins* **Touch Bar Theme** aktivieren. Das Display wechselt
-   automatisch auf das Theme.
+4. Unter *Plugins → Installierte Plugins* **Fascia** aktivieren. Das Display wechselt
+   automatisch.
 
 Für Updates die neuen Dateien kopieren und auf dem Gerät `volumio plugin update` ausführen.
+
+### Umstieg vom „Touch Bar Theme“
+
+Fascia ist der neue Name des Touch Bar Theme (Plugin-ID `touch_bar_theme` → `fascia`). Unter
+*Plugins → Installierte Plugins* das *Touch Bar Theme* deaktivieren und deinstallieren, dann Fascia
+wie oben installieren. Fascia übernimmt dessen Einstellungen und räumt Reste auf (Kiosk-URL,
+Port-80-Umleitung, ALSA-Baustein).
 
 ## Einstellungen
 
@@ -140,7 +148,7 @@ Für Updates die neuen Dateien kopieren und auf dem Gerät `volumio plugin updat
 | `lib/kiosk.js` | Stellt den Kiosk des Touch-Display-Plugins auf das Theme um und zurück |
 | `lib/port80.js` | systemd-Ergänzung, die Port 80 auf das Theme umleitet |
 | `lib/spectrum.js`, `lib/spectrum-worker.js` | Liest den Analyzer-FIFO, FFT, Server-Sent Events |
-| `alsa/touchbar_scope.c`, `alsa/lib/*` | ALSA-`meter`-Scope und vorgebaute Bibliotheken |
+| `alsa/fascia_scope.c`, `alsa/lib/*` | ALSA-`meter`-Scope und vorgebaute Bibliotheken |
 | `app/` | Die Oberfläche (HTML/CSS/JS), spricht per Socket.IO mit Volumio |
 | `app/demo.js` | Simuliertes Volumio für den Demo-Modus |
 
@@ -149,10 +157,10 @@ Für Updates die neuen Dateien kopieren und auf dem Gerät `volumio plugin updat
 Alle werden beim Deaktivieren oder Deinstallieren des Plugins zurückgenommen.
 
 - **Kiosk**: ersetzt `http://localhost:3000` in `/opt/volumiokiosk.sh` durch die Theme-URL.
-- **Port 80**: legt `/etc/systemd/system/iptables.service.d/touchbar.conf` an, damit Volumios
+- **Port 80**: legt `/etc/systemd/system/iptables.service.d/fascia.conf` an, damit Volumios
   vorhandene Umleitung von Port 80 auf das Theme statt auf Port 3000 zeigt.
 - **Analyzer**: trägt über Volumios offizielle Schnittstelle (`has_alsa_contribution`) einen
-  ALSA-Baustein ein: `volumio → touchbar_meter → volumioOutput`. ALSAs `meter` reicht den Ton
+  ALSA-Baustein ein: `volumio → fascia_meter → volumioOutput`. ALSAs `meter` reicht den Ton
   unverändert weiter; der Scope kopiert ihn in einen FIFO und verwirft Daten, statt die Wiedergabe
   jemals zu blockieren. Vor dem Einbau wird die Bibliothek in einer abgeschotteten Testkette
   (Ausgabe ins Leere) geladen; schlägt das fehl, bleibt die Audiokette unverändert. Weil `meter`
@@ -177,7 +185,7 @@ Im Browser die Geräteemulation auf 1480×320 oder 320×1480 stellen. URL-Parame
   GPIO-Plugins wie *Rotary Encoder II* räumen ihre Device-Tree-Overlays dabei nicht auf. Den Pi neu
   starten (oder das Plugin aus- und wieder einschalten).
 - **`https://volumio.local` öffnet das Theme nicht**: Volumio hat kein HTTPS, `http://` verwenden.
-- **Keine Analyzer-Balken**: Plugin-Log prüfen (`journalctl -u volumio | grep touch_bar`). Ist der
+- **Keine Analyzer-Balken**: Plugin-Log prüfen (`journalctl -u volumio | grep fascia`). Ist der
   Ladetest fehlgeschlagen, bleibt der Analyzer aus, die Wiedergabe ist nicht betroffen.
 
 ## Lizenz

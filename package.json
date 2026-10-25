@@ -1,7 +1,7 @@
 {
-  "name": "touch_bar_theme",
-  "version": "1.1.0",
-  "description": "Touch-first Volumio UI for 320×1480 bar displays with a band analyzer for every source",
+  "name": "fascia",
+  "version": "2.0.0",
+  "description": "Fascia – touch-first Volumio UI for bar displays (e.g. 1480×320) with a band analyzer for every source, lyrics and a VFD style",
   "main": "index.js",
   "scripts": {
     "test": "node test/smoke.js",
@@ -12,10 +12,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/deckerjulian/volumio-touch-bar-theme.git"
+    "url": "https://github.com/deckerjulian/volumio-fascia.git"
   },
   "volumio_info": {
-    "prettyName": "Touch Bar Theme",
+    "prettyName": "Fascia",
     "icon": "fa-mobile",
     "plugin_type": "user_interface",
     "architectures": [
@@ -29,8 +29,8 @@
       "bullseye",
       "bookworm"
     ],
-    "details": "Eigene Oberfläche für Touch-Displays mit 320×1480 Pixeln. Läuft als eigener Webserver und wird auf Wunsch automatisch als Kiosk-Seite des Touch-Display-Plugins eingetragen.",
-    "changelog": "1.1.0: Band-Analyzer für alle Quellen (ALSA), einklappbares Menü, Volumio-Einstellungen; 1.0.0: Erste Version",
+    "details": "Fascia: eigene Oberfläche für schmale Touch-Displays (z. B. 1480×320) mit Band-Analyzer für alle Quellen, mitlaufendem Songtext und VFD-Stil. Läuft als eigener Webserver und wird auf Wunsch automatisch als Kiosk-Seite des Touch-Display-Plugins eingetragen. Nachfolger des Touch Bar Theme (Einstellungen werden übernommen).",
+    "changelog": "2.0.0: Neuer Name Fascia, Songtext & Infos, VFD-Stil, Einstellungen sofort auf allen Anzeigen; 1.1.0: Band-Analyzer für alle Quellen (ALSA), einklappbares Menü, Volumio-Einstellungen; 1.0.0: Erste Version",
     "has_alsa_contribution": true
   },
   "engines": {
@@ -41,7 +41,7 @@
     "kew": "^0.7.0",
     "v-conf": "^1.4.2"
   },
-  "homepage": "https://github.com/deckerjulian/volumio-touch-bar-theme",
+  "homepage": "https://github.com/deckerjulian/volumio-fascia",
   "keywords": [
     "volumio",
     "volumio-plugin",

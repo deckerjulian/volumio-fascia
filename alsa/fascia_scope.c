@@ -1,5 +1,5 @@
 /*
- * ALSA-"meter"-Scope für den Band-Analyzer des Touch Bar Theme.
+ * ALSA-"meter"-Scope für den Band-Analyzer von Fascia.
  *
  * Das ALSA-Plugin "meter" reicht den Ton unverändert an das nächste Gerät weiter und ruft
  * regelmäßig seine Scopes auf. Dieser Scope mischt das Signal auf mono, reduziert Hi-Res-Raten
@@ -12,7 +12,7 @@
  *  - Jeder write() ist höchstens PIPE_BUF groß und damit atomar; Samples bleiben ausgerichtet.
  *  - Fehlt der FIFO oder klappt etwas nicht, macht der Scope einfach nichts.
  *
- * Build (siehe build.sh): gcc -shared -fPIC -DPIC -O2 -o libtouchbar_scope.so touchbar_scope.c -lasound
+ * Build (siehe build.sh): gcc -shared -fPIC -DPIC -O2 -o libfascia_scope.so fascia_scope.c -lasound
  */
 
 #include <alsa/asoundlib.h>
@@ -41,16 +41,16 @@ typedef struct {
 	unsigned int accn;
 	int16_t out[OUT_SAMPLES];
 	unsigned int nout;
-} touchbar_t;
+} fascia_t;
 
-static void tb_close_fifo(touchbar_t *t)
+static void fascia_close_fifo(fascia_t *t)
 {
 	if (t->fd >= 0)
 		close(t->fd);
 	t->fd = -1;
 }
 
-static void tb_open_fifo(touchbar_t *t)
+static void fascia_open_fifo(fascia_t *t)
 {
 	time_t now;
 
@@ -71,18 +71,18 @@ static void tb_open_fifo(touchbar_t *t)
 	if (t->fd >= 0) {
 		struct stat st;
 		if (fstat(t->fd, &st) < 0 || !S_ISFIFO(st.st_mode))
-			tb_close_fifo(t);
+			fascia_close_fifo(t);
 	}
 }
 
-static void tb_flush(touchbar_t *t)
+static void fascia_flush(fascia_t *t)
 {
 	if (!t->nout)
 		return;
 	if (t->fd >= 0) {
 		ssize_t w = write(t->fd, t->out, t->nout * sizeof(int16_t));
 		if (w < 0 && errno != EAGAIN && errno != EINTR)
-			tb_close_fifo(t);
+			fascia_close_fifo(t);
 	}
 	t->nout = 0;
 }
@@ -93,7 +93,7 @@ static void tb_flush(touchbar_t *t)
  * fremde Dateien verhindert fs.protected_regular. Deshalb: vorhandene Datei ohne O_CREAT
  * überschreiben, nur eine fehlende neu anlegen (für alle beschreibbar).
  */
-static void tb_write_rate(touchbar_t *t, unsigned int rate)
+static void fascia_write_rate(fascia_t *t, unsigned int rate)
 {
 	char buf[32];
 	int fd, n;
@@ -115,7 +115,7 @@ static void tb_write_rate(touchbar_t *t, unsigned int rate)
 	close(fd);
 }
 
-static void tb_feed(touchbar_t *t, snd_pcm_uframes_t offset, snd_pcm_uframes_t frames, unsigned int channels)
+static void fascia_feed(fascia_t *t, snd_pcm_uframes_t offset, snd_pcm_uframes_t frames, unsigned int channels)
 {
 	int16_t *l, *r;
 	snd_pcm_uframes_t i;
@@ -136,25 +136,25 @@ static void tb_feed(touchbar_t *t, snd_pcm_uframes_t offset, snd_pcm_uframes_t f
 			t->acc = 0;
 			t->accn = 0;
 			if (t->nout == OUT_SAMPLES)
-				tb_flush(t);
+				fascia_flush(t);
 		}
 	}
 }
 
-static int tb_enable(snd_pcm_scope_t *scope)
+static int fascia_enable(snd_pcm_scope_t *scope)
 {
 	(void)scope;
 	return 0;
 }
 
-static void tb_disable(snd_pcm_scope_t *scope)
+static void fascia_disable(snd_pcm_scope_t *scope)
 {
 	(void)scope;
 }
 
-static void tb_start(snd_pcm_scope_t *scope)
+static void fascia_start(snd_pcm_scope_t *scope)
 {
-	touchbar_t *t = snd_pcm_scope_get_callback_private(scope);
+	fascia_t *t = snd_pcm_scope_get_callback_private(scope);
 	unsigned int rate = snd_pcm_meter_get_rate(t->pcm);
 
 	t->factor = rate >= 176400 ? 4 : rate >= 88200 ? 2 : 1;
@@ -162,22 +162,22 @@ static void tb_start(snd_pcm_scope_t *scope)
 	t->accn = 0;
 	t->nout = 0;
 	t->old = snd_pcm_meter_get_now(t->pcm);
-	tb_write_rate(t, rate / t->factor);
+	fascia_write_rate(t, rate / t->factor);
 }
 
-static void tb_stop(snd_pcm_scope_t *scope)
+static void fascia_stop(snd_pcm_scope_t *scope)
 {
-	touchbar_t *t = snd_pcm_scope_get_callback_private(scope);
+	fascia_t *t = snd_pcm_scope_get_callback_private(scope);
 
-	tb_flush(t);
+	fascia_flush(t);
 	/* Schließen: der Leser bekommt EOF und lässt die Balken fallen */
-	tb_close_fifo(t);
+	fascia_close_fifo(t);
 	t->last_try = 0;
 }
 
-static void tb_update(snd_pcm_scope_t *scope)
+static void fascia_update(snd_pcm_scope_t *scope)
 {
-	touchbar_t *t = snd_pcm_scope_get_callback_private(scope);
+	fascia_t *t = snd_pcm_scope_get_callback_private(scope);
 	snd_pcm_t *pcm = t->pcm;
 	snd_pcm_uframes_t bufsize = snd_pcm_meter_get_bufsize(pcm);
 	snd_pcm_uframes_t now = snd_pcm_meter_get_now(pcm);
@@ -195,7 +195,7 @@ static void tb_update(snd_pcm_scope_t *scope)
 	if ((snd_pcm_uframes_t)size > bufsize)
 		size = bufsize;
 
-	tb_open_fifo(t);
+	fascia_open_fifo(t);
 	if (t->fd < 0)
 		return;
 
@@ -204,14 +204,14 @@ static void tb_update(snd_pcm_scope_t *scope)
 	cont = bufsize - offset;
 	size1 = (snd_pcm_uframes_t)size > cont ? cont : (snd_pcm_uframes_t)size;
 	size2 = size - size1;
-	tb_feed(t, offset, size1, channels);
-	tb_feed(t, 0, size2, channels);
-	tb_flush(t);
+	fascia_feed(t, offset, size1, channels);
+	fascia_feed(t, 0, size2, channels);
+	fascia_flush(t);
 }
 
-static void tb_reset(snd_pcm_scope_t *scope)
+static void fascia_reset(snd_pcm_scope_t *scope)
 {
-	touchbar_t *t = snd_pcm_scope_get_callback_private(scope);
+	fascia_t *t = snd_pcm_scope_get_callback_private(scope);
 
 	t->old = snd_pcm_meter_get_now(t->pcm);
 	t->acc = 0;
@@ -219,34 +219,34 @@ static void tb_reset(snd_pcm_scope_t *scope)
 	t->nout = 0;
 }
 
-static void tb_close(snd_pcm_scope_t *scope)
+static void fascia_close(snd_pcm_scope_t *scope)
 {
-	touchbar_t *t = snd_pcm_scope_get_callback_private(scope);
+	fascia_t *t = snd_pcm_scope_get_callback_private(scope);
 
-	tb_close_fifo(t);
+	fascia_close_fifo(t);
 	free(t->fifo);
 	free(t->ratefile);
 	free(t);
 }
 
-static const snd_pcm_scope_ops_t tb_ops = {
-	.enable = tb_enable,
-	.disable = tb_disable,
-	.start = tb_start,
-	.stop = tb_stop,
-	.update = tb_update,
-	.reset = tb_reset,
-	.close = tb_close,
+static const snd_pcm_scope_ops_t fascia_ops = {
+	.enable = fascia_enable,
+	.disable = fascia_disable,
+	.start = fascia_start,
+	.stop = fascia_stop,
+	.update = fascia_update,
+	.reset = fascia_reset,
+	.close = fascia_close,
 };
 
-int _snd_pcm_scope_touchbar_open(snd_pcm_t *pcm, const char *name,
+int _snd_pcm_scope_fascia_open(snd_pcm_t *pcm, const char *name,
 				 snd_config_t *root, snd_config_t *conf)
 {
 	snd_config_iterator_t i, next;
 	snd_pcm_scope_t *scope, *s16;
-	const char *fifo = "/tmp/touchbar_alsa.fifo";
-	const char *ratefile = "/tmp/touchbar_alsa.rate";
-	touchbar_t *t;
+	const char *fifo = "/tmp/fascia_alsa.fifo";
+	const char *ratefile = "/tmp/fascia_alsa.rate";
+	fascia_t *t;
 	int err;
 
 	(void)root;
@@ -306,9 +306,9 @@ int _snd_pcm_scope_touchbar_open(snd_pcm_t *pcm, const char *name,
 	}
 	t->s16 = s16;
 	snd_pcm_scope_set_name(scope, name);
-	snd_pcm_scope_set_ops(scope, &tb_ops);
+	snd_pcm_scope_set_ops(scope, &fascia_ops);
 	snd_pcm_scope_set_callback_private(scope, t);
 	snd_pcm_meter_add_scope(pcm, scope);
 	return 0;
 }
-SND_DLSYM_BUILD_VERSION(_snd_pcm_scope_touchbar_open, SND_PCM_SCOPE_DLSYM_VERSION);
+SND_DLSYM_BUILD_VERSION(_snd_pcm_scope_fascia_open, SND_PCM_SCOPE_DLSYM_VERSION);

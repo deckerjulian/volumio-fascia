@@ -11,7 +11,7 @@
       "icon": "fa-mobile",
       "onSave": {
         "type": "controller",
-        "endpoint": "user_interface/touch_bar_theme",
+        "endpoint": "user_interface/fascia",
         "method": "saveDisplay"
       },
       "saveButton": {
@@ -60,7 +60,7 @@
           "doc": "TRANSLATE.RESTART_KIOSK_DOC",
           "onClick": {
             "type": "plugin",
-            "endpoint": "user_interface/touch_bar_theme",
+            "endpoint": "user_interface/fascia",
             "method": "restartKiosk",
             "data": []
           }
@@ -74,7 +74,7 @@
       "icon": "fa-paint-brush",
       "onSave": {
         "type": "controller",
-        "endpoint": "user_interface/touch_bar_theme",
+        "endpoint": "user_interface/fascia",
         "method": "saveAppearance"
       },
       "saveButton": {
@@ -253,7 +253,7 @@
       "icon": "fa-hand-pointer-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "user_interface/touch_bar_theme",
+        "endpoint": "user_interface/fascia",
         "method": "saveBehaviour"
       },
       "saveButton": {

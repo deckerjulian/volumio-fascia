@@ -1,5 +1,5 @@
 {
-  "PAGE_TITLE": "Touch Bar Theme",
+  "PAGE_TITLE": "Fascia",
   "SAVE": "Save",
   "SECTION_DISPLAY": "Display & kiosk",
   "SECTION_DISPLAY_DESC": "The theme runs at {url}. The Volumio UI stays available on port 3000. The Touch Display plugin is required for the local screen.",
@@ -35,7 +35,7 @@
   "IDLE_TIMEOUT": "Idle screen after (seconds)",
   "IDLE_TIMEOUT_DOC": "Shows a dimmed clock while nothing is playing and the display is not touched. 0 = off.",
   "SAVED": "Settings saved",
-  "KIOSK_APPLIED": "Kiosk now shows the Touch Bar Theme",
+  "KIOSK_APPLIED": "Kiosk now shows the Fascia",
   "KIOSK_RESTORED": "Kiosk shows the default UI again",
   "KIOSK_MISSING": "No kiosk found. Please install and enable the Touch Display plugin.",
   "KIOSK_RESTARTED": "Reloading display",
@@ -58,6 +58,6 @@
   "ANALYZER_FAILED": "The band analyzer could not be activated (see log). Playback is not affected.",
   "PORT80": "Show theme at volumio.local",
   "PORT80_DOC": "Redirects http://volumio.local (port 80) to the theme. Volumio's own UI stays available at http://volumio.local:3000.",
-  "PORT80_APPLIED": "volumio.local now shows the Touch Bar Theme",
+  "PORT80_APPLIED": "volumio.local now shows the Fascia",
   "PORT80_RESTORED": "volumio.local shows the Volumio UI again"
 }
